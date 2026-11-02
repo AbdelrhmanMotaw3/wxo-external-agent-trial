@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: wxo-external-agent-trial
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: AGENT_AUTH_TOKEN
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: openai/gpt-4o-mini
+      - key: PUBLIC_URL
+        sync: false
+      - key: CHAT_AGENT_ID
+        sync: false
+      - key: A2A_AGENT_ID
+        sync: false
+      - key: CHAT_OBS_AGENT_ID
+        sync: false
+      - key: A2A_OBS_AGENT_ID
+        sync: false
+      - key: TENANT_ID
+        sync: false
+      - key: ENVIRONMENT_NAME
+        value: draft
+      - key: OTEL_EXPORT_URL
+        sync: false
+      - key: AUTH_TYPE
+        sync: false
+      - key: API_KEY
+        sync: false
+      - key: TOKEN_URL
+        value: https://iam.cloud.ibm.com/identity/token
+      - key: X_API_KEY
+        sync: false
+      - key: MCSP_V2_TOKEN_URL
+        sync: false

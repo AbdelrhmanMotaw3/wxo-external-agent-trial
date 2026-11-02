@@ -1,0 +1,24 @@
+spec_version: v1
+kind: external
+name: external_chat_trial
+title: External Chat Trial
+nickname: external_chat_trial
+provider: external_chat
+description: |
+  Route here for chat-completion protocol trials.
+  Use when the user mentions chat trial, chat completions, OpenAI-style external agent,
+  or asks to exercise the chat path of the Render-hosted LangGraph trial service.
+  Do NOT route A2A or agent-card questions here.
+tags:
+  - trial
+  - external
+  - chat
+api_url: "${PUBLIC_URL}/chat/completions"
+auth_scheme: BEARER_TOKEN
+auth_config:
+  token: "${AGENT_AUTH_TOKEN}"
+chat_params:
+  stream: true
+config:
+  hidden: false
+  enable_cot: true

@@ -1,0 +1,25 @@
+spec_version: v1
+kind: external
+name: external_a2a_trial
+title: External A2A Trial
+nickname: external_a2a_trial
+provider: external_chat/A2A/0.3.0
+description: |
+  Route here for A2A protocol trials.
+  Use when the user mentions a2a trial, agent-to-agent, agent card, JSON-RPC external agent,
+  or asks to exercise the A2A path of the Render-hosted LangGraph trial service.
+  Do NOT route plain chat-completion trial questions here.
+tags:
+  - trial
+  - external
+  - a2a
+api_url: "${PUBLIC_URL}"
+auth_scheme: BEARER_TOKEN
+auth_config:
+  token: "${AGENT_AUTH_TOKEN}"
+chat_params:
+  sendHistory: true
+  stream: true
+  pushNotifications: false
+config:
+  hidden: false
