@@ -40,11 +40,12 @@ async def on_startup() -> None:
     logger.info("Default model: %s", config.OPENROUTER_MODEL)
 
 
-# A2A routes are mounted at process import time so OpenAPI/discovery stay stable.
+# A2A routes are required. Fail startup if they cannot be mounted.
 try:
     mount_a2a_routes(app, protocol_label="a2a")
-except Exception as exc:  # noqa: BLE001
-    logger.exception("Failed to mount A2A routes at import time: %s", exc)
+except Exception:
+    logger.exception("Failed to mount required A2A routes")
+    raise
 
 
 class DemoRequest(BaseModel):

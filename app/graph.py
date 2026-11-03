@@ -28,7 +28,7 @@ def trial_lookup(topic: str) -> str:
     """Return a fixed demo fact for the given topic. Use for trial / status / lookup questions."""
     normalized = (topic or "").strip().lower()
     catalog = {
-        "status": "Trial service is healthy. Hosted on Render, model via OpenRouter.",
+        "status": "Trial service is healthy. Model is provided via OpenRouter.",
         "protocol": "This service supports chat completions and A2A 0.3.0 JSON-RPC.",
         "account": "Demo account ACME-1001 is active with plan External Agents Trial.",
         "observability": "Traces export over OTLP/HTTP to watsonx Orchestrate Agent Analytics.",
