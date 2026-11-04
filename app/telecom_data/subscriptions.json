@@ -1,0 +1,22 @@
+[
+  {"id":"SUB-1001","customer_id":"CUST-1001","area_id":"AREA-001","service":"home_internet","plan_id":"PLAN-001","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1002","customer_id":"CUST-1002","area_id":"AREA-002","service":"home_internet","plan_id":"PLAN-002","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1003","customer_id":"CUST-1003","area_id":"AREA-003","service":"home_internet","plan_id":"PLAN-003","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1004","customer_id":"CUST-1004","area_id":"AREA-004","service":"home_internet","plan_id":"PLAN-004","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1005","customer_id":"CUST-1005","area_id":"AREA-005","service":"home_internet","plan_id":"PLAN-005","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1006","customer_id":"CUST-1006","area_id":"AREA-006","service":"home_internet","plan_id":"PLAN-006","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1007","customer_id":"CUST-1007","area_id":"AREA-003","service":"home_internet","plan_id":"PLAN-001","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1008","customer_id":"CUST-1008","area_id":"AREA-004","service":"home_internet","plan_id":"PLAN-002","service_status":"suspended","suspension_reason":"overdue_invoice"},
+  {"id":"SUB-1009","customer_id":"CUST-1009","area_id":"AREA-005","service":"home_internet","plan_id":"PLAN-003","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1010","customer_id":"CUST-1010","area_id":"AREA-006","service":"home_internet","plan_id":"PLAN-004","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1011","customer_id":"CUST-1011","area_id":"AREA-007","service":"home_internet","plan_id":"PLAN-005","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1012","customer_id":"CUST-1012","area_id":"AREA-003","service":"home_internet","plan_id":"PLAN-006","service_status":"suspended","suspension_reason":"overdue_invoice"},
+  {"id":"SUB-1013","customer_id":"CUST-1013","area_id":"AREA-005","service":"home_internet","plan_id":"PLAN-001","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1014","customer_id":"CUST-1014","area_id":"AREA-006","service":"home_internet","plan_id":"PLAN-002","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1015","customer_id":"CUST-1015","area_id":"AREA-007","service":"home_internet","plan_id":"PLAN-003","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1016","customer_id":"CUST-1016","area_id":"AREA-008","service":"home_internet","plan_id":"PLAN-004","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1017","customer_id":"CUST-1017","area_id":"AREA-001","service":"home_internet","plan_id":"PLAN-005","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1018","customer_id":"CUST-1018","area_id":"AREA-002","service":"home_internet","plan_id":"PLAN-006","service_status":"suspended","suspension_reason":"overdue_invoice"},
+  {"id":"SUB-1019","customer_id":"CUST-1019","area_id":"AREA-003","service":"home_internet","plan_id":"PLAN-001","service_status":"active","suspension_reason":null},
+  {"id":"SUB-1020","customer_id":"CUST-1020","area_id":"AREA-004","service":"home_internet","plan_id":"PLAN-002","service_status":"active","suspension_reason":null}
+]

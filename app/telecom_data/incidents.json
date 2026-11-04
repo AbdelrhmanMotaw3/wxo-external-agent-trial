@@ -1,0 +1,12 @@
+[
+  {"id":"INC-024","area_id":"AREA-003","service":"home_internet","status":"active","start_utc":"2026-10-15T08:30:00Z","estimated_restoration_utc":"2026-10-15T13:00:00Z","resolved_utc":null},
+  {"id":"INC-025","area_id":"AREA-006","service":"home_internet","status":"resolved","start_utc":"2026-10-14T08:30:00Z","estimated_restoration_utc":null,"resolved_utc":"2026-10-14T10:30:00Z"},
+  {"id":"INC-026","area_id":"AREA-007","service":"mobile_data","status":"active","start_utc":"2026-10-15T09:30:00Z","estimated_restoration_utc":null,"resolved_utc":null},
+  {"id":"INC-027","area_id":"AREA-001","service":"home_internet","status":"resolved","start_utc":"2026-10-12T08:30:00Z","estimated_restoration_utc":null,"resolved_utc":"2026-10-12T10:30:00Z"},
+  {"id":"INC-028","area_id":"AREA-002","service":"mobile_data","status":"active","start_utc":"2026-10-15T08:45:00Z","estimated_restoration_utc":"2026-10-15T13:30:00Z","resolved_utc":null},
+  {"id":"INC-029","area_id":"AREA-008","service":"home_internet","status":"active","start_utc":"2026-10-15T07:30:00Z","estimated_restoration_utc":null,"resolved_utc":null},
+  {"id":"INC-030","area_id":"AREA-003","service":"mobile_data","status":"resolved","start_utc":"2026-10-13T08:30:00Z","estimated_restoration_utc":null,"resolved_utc":"2026-10-13T10:30:00Z"},
+  {"id":"INC-031","area_id":"AREA-005","service":"home_internet","status":"resolved","start_utc":"2026-10-13T06:00:00Z","estimated_restoration_utc":null,"resolved_utc":"2026-10-13T08:30:00Z"},
+  {"id":"INC-032","area_id":"AREA-004","service":"mobile_data","status":"resolved","start_utc":"2026-10-12T04:30:00Z","estimated_restoration_utc":null,"resolved_utc":"2026-10-12T10:30:00Z"},
+  {"id":"INC-033","area_id":"AREA-006","service":"mobile_data","status":"resolved","start_utc":"2026-10-14T05:30:00Z","estimated_restoration_utc":null,"resolved_utc":"2026-10-14T10:30:00Z"}
+]

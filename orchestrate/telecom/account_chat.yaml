@@ -1,0 +1,17 @@
+spec_version: v1
+kind: external
+name: telecom_account_chat
+title: Customer Account Chat Completions
+nickname: telecom_account_chat
+provider: external_chat
+description: |
+  Look up customer accounts, subscriptions, plans, invoices and service area by customer ID.
+  Invoke this registration for Chat Completions requests.
+api_url: "${ACCOUNT_PUBLIC_URL}/chat/completions"
+auth_scheme: BEARER_TOKEN
+auth_config:
+  token: "${ACCOUNT_AUTH_TOKEN}"
+chat_params:
+  stream: false
+config:
+  hidden: false

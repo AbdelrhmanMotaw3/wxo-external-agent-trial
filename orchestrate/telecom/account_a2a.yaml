@@ -1,0 +1,19 @@
+spec_version: v1
+kind: external
+name: telecom_account_a2a
+title: Customer Account A2A
+nickname: telecom_account_a2a
+provider: external_chat/A2A/0.3.0
+description: |
+  Look up customer accounts, subscriptions, plans, invoices and service area by customer ID.
+  Invoke this registration for A2A requests.
+api_url: "${ACCOUNT_PUBLIC_URL}"
+auth_scheme: BEARER_TOKEN
+auth_config:
+  token: "${ACCOUNT_AUTH_TOKEN}"
+chat_params:
+  stream: false
+  sendHistory: false
+  pushNotifications: false
+config:
+  hidden: false

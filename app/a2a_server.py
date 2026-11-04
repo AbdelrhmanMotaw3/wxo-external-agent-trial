@@ -24,7 +24,7 @@ from a2a.types import (
 )
 
 from app import config
-from app.graph import run_sync
+from app.graph import SPECIALIST, run_sync
 
 logger = logging.getLogger(__name__)
 
@@ -136,9 +136,20 @@ def build_agent_card() -> AgentCard:
         input_modes=["text"],
         output_modes=["text", "task-status"],
     )
+    if SPECIALIST:
+        skill = AgentSkill(
+            id=config.AGENT_PROFILE,
+            name=SPECIALIST.title,
+            description=SPECIALIST.description,
+            tags=["telecom", "synthetic-data"],
+            examples=list(SPECIALIST.examples),
+            input_modes=["text"],
+            output_modes=["text", "task-status"],
+        )
     return AgentCard(
-        name="External Agent Trial (A2A)",
+        name=f"{SPECIALIST.title} (A2A)" if SPECIALIST else "External Agent Trial (A2A)",
         description=(
+            SPECIALIST.description if SPECIALIST else
             "LangGraph + FastAPI external agent for watsonx Orchestrate A2A 0.3.0 trials. "
             "Route here for A2A protocol tests."
         ),

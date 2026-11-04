@@ -12,6 +12,11 @@ from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 
 from app import config
+from app.telecom import SPECIALISTS, evidence_footer
+
+if config.AGENT_PROFILE != "trial" and config.AGENT_PROFILE not in SPECIALISTS:
+    raise ValueError(f"Unsupported AGENT_PROFILE: {config.AGENT_PROFILE}")
+SPECIALIST = SPECIALISTS.get(config.AGENT_PROFILE)
 
 logger = logging.getLogger(__name__)
 
@@ -56,14 +61,16 @@ def build_llm(model: str | None = None) -> ChatOpenAI:
 @lru_cache(maxsize=4)
 def get_graph(model: str | None = None):
     llm = build_llm(model)
-    return create_react_agent(llm, tools=[trial_lookup])
+    tools = list(SPECIALIST.tools) if SPECIALIST else [trial_lookup]
+    return create_react_agent(llm, tools=tools)
 
 
 def to_langchain_messages(
     messages: list[dict[str, Any]] | list[Any],
     protocol: str,
 ) -> list[BaseMessage]:
-    converted: list[BaseMessage] = [SystemMessage(content=SYSTEM_PROMPT.format(protocol=protocol))]
+    prompt = SPECIALIST.prompt(protocol) if SPECIALIST else SYSTEM_PROMPT.format(protocol=protocol)
+    converted: list[BaseMessage] = [SystemMessage(content=prompt)]
     for msg in messages:
         if hasattr(msg, "model_dump"):
             data = msg.model_dump()
@@ -74,6 +81,8 @@ def to_langchain_messages(
 
         role = (data.get("role") or "user").lower()
         content = data.get("content") or ""
+        if SPECIALIST and role in {"system", "tool"}:
+            continue
         if role in {"user", "human"}:
             converted.append(HumanMessage(content=content))
         elif role == "system":
@@ -104,8 +113,11 @@ def run_sync(messages: list[Any], protocol: str, model: str | None = None) -> st
                 parts.append(item.get("text", ""))
             elif isinstance(item, str):
                 parts.append(item)
-        return "".join(parts)
-    return str(content or "")
+        content = "".join(parts)
+    answer = str(content or "")
+    if SPECIALIST:
+        answer += evidence_footer(result["messages"][len(inputs["messages"]):], SPECIALIST, protocol)
+    return answer
 
 
 async def astream_events(messages: list[Any], protocol: str, model: str | None = None):

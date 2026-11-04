@@ -1,0 +1,19 @@
+spec_version: v1
+kind: external
+name: telecom_network_a2a
+title: Network Service A2A
+nickname: telecom_network_a2a
+provider: external_chat/A2A/0.3.0
+description: |
+  Check service areas, active incidents and future maintenance by area ID and service.
+  Invoke this registration for A2A requests.
+api_url: "${NETWORK_PUBLIC_URL}"
+auth_scheme: BEARER_TOKEN
+auth_config:
+  token: "${NETWORK_AUTH_TOKEN}"
+chat_params:
+  stream: false
+  sendHistory: false
+  pushNotifications: false
+config:
+  hidden: false

@@ -1,0 +1,10 @@
+[
+  {"id":"AREA-001","name":"Cairo North","services":["home_internet","mobile_data"]},
+  {"id":"AREA-002","name":"Cairo South","services":["home_internet","mobile_data"]},
+  {"id":"AREA-003","name":"Giza Central","services":["home_internet","mobile_data"]},
+  {"id":"AREA-004","name":"Giza West","services":["home_internet","mobile_data"]},
+  {"id":"AREA-005","name":"Alexandria East","services":["home_internet","mobile_data"]},
+  {"id":"AREA-006","name":"Alexandria West","services":["home_internet","mobile_data"]},
+  {"id":"AREA-007","name":"Delta Central","services":["home_internet","mobile_data"]},
+  {"id":"AREA-008","name":"Upper Egypt Central","services":["home_internet","mobile_data"]}
+]

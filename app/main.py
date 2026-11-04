@@ -97,12 +97,15 @@ async def auth_middleware(request: Request, call_next):
 
 @app.get("/health")
 async def health() -> dict[str, Any]:
-    return {
+    health_data = {
         "status": "ok",
         "service": config.SERVICE_NAME,
         "model": config.OPENROUTER_MODEL,
         "public_url": config.PUBLIC_URL,
     }
+    if config.AGENT_PROFILE != "trial":
+        health_data["agent_profile"] = config.AGENT_PROFILE
+    return health_data
 
 
 @app.post("/chat/completions")

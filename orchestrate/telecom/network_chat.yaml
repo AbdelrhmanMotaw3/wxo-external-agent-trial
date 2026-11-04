@@ -1,0 +1,17 @@
+spec_version: v1
+kind: external
+name: telecom_network_chat
+title: Network Service Chat Completions
+nickname: telecom_network_chat
+provider: external_chat
+description: |
+  Check service areas, active incidents and future maintenance by area ID and service.
+  Invoke this registration for Chat Completions requests.
+api_url: "${NETWORK_PUBLIC_URL}/chat/completions"
+auth_scheme: BEARER_TOKEN
+auth_config:
+  token: "${NETWORK_AUTH_TOKEN}"
+chat_params:
+  stream: false
+config:
+  hidden: false

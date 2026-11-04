@@ -19,6 +19,7 @@ def env(name: str, default: str | None = None) -> str | None:
 PUBLIC_URL = (env("PUBLIC_URL", "http://localhost:8080") or "http://localhost:8080").rstrip(
     "/"
 )
+AGENT_PROFILE = env("AGENT_PROFILE", "trial")
 AGENT_AUTH_TOKEN = env("AGENT_AUTH_TOKEN", "change-me-trial-token") or "change-me-trial-token"
 OPENROUTER_API_KEY = env("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = env("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1") or (

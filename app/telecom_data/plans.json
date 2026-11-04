@@ -1,0 +1,8 @@
+[
+  {"id":"PLAN-001","name":"Demo Home 100","download_mbps":100,"monthly_fee_egp":250},
+  {"id":"PLAN-002","name":"Demo Home 200","download_mbps":200,"monthly_fee_egp":350},
+  {"id":"PLAN-003","name":"Demo Home 300","download_mbps":300,"monthly_fee_egp":450},
+  {"id":"PLAN-004","name":"Demo Home 500","download_mbps":500,"monthly_fee_egp":550},
+  {"id":"PLAN-005","name":"Demo Home 750","download_mbps":750,"monthly_fee_egp":650},
+  {"id":"PLAN-006","name":"Demo Home 1000","download_mbps":1000,"monthly_fee_egp":750}
+]

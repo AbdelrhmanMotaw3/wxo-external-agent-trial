@@ -20,6 +20,8 @@ The LLM is **OpenRouter**. You can host the service on **IBM Cloud Code Engine**
 
 Auth for protected routes: `Authorization: Bearer <AGENT_AUTH_TOKEN>` or `X-API-Key: <AGENT_AUTH_TOKEN>`.
 
+For the two-specialist Telecom Customer Support exercise, use the [lab guide](orchestrate/telecom/README.md).
+
 ## Local run
 
 ```powershell

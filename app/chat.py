@@ -11,7 +11,8 @@ from typing import Any, AsyncIterator, Optional
 from pydantic import BaseModel, Field
 
 from app import config
-from app.graph import astream_events, run_sync
+from app.graph import SPECIALIST, astream_events, run_sync
+from app.telecom import evidence_footer
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +81,7 @@ async def stream_chat_completions(
     protocol: str = "chat_completions",
 ) -> AsyncIterator[str]:
     model = request.model or config.OPENROUTER_MODEL
+    tool_results = []
     try:
         async for event in astream_events(request.messages, protocol=protocol, model=model):
             kind = event.get("event")
@@ -147,6 +149,8 @@ async def stream_chat_completions(
                 yield format_sse(tool_struct)
             elif kind == "on_tool_end":
                 output = event.get("data", {}).get("output")
+                if SPECIALIST:
+                    tool_results.append(output)
                 content = getattr(output, "content", "") if output is not None else ""
                 tool_call_id = event.get("run_id")
                 yield format_sse(
@@ -171,6 +175,20 @@ async def stream_chat_completions(
                         ],
                     }
                 )
+        if SPECIALIST:
+            yield format_sse(
+                {
+                    "id": str(uuid.uuid4()),
+                    "object": "thread.message.delta",
+                    "created": int(time.time()),
+                    "thread_id": thread_id,
+                    "model": model,
+                    "choices": [{"delta": {
+                        "role": "assistant",
+                        "content": evidence_footer(tool_results, SPECIALIST, protocol),
+                    }}],
+                }
+            )
     except Exception as exc:  # noqa: BLE001
         logger.exception("chat stream failed")
         yield format_sse(
