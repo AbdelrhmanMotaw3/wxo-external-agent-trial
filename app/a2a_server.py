@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import asyncio
 from typing import Any
 
 from a2a.server.agent_execution.agent_executor import AgentExecutor
@@ -25,6 +26,7 @@ from a2a.types import (
 
 from app import config
 from app.graph import SPECIALIST, run_sync
+from app.tracing import agent_span, incoming_request_context, record_content
 
 logger = logging.getLogger(__name__)
 
@@ -92,10 +94,23 @@ class TrialAgentExecutor(AgentExecutor):
 
         query = context.get_user_input()
         try:
-            answer = run_sync(
-                [{"role": "user", "content": query or ""}],
+            incoming = incoming_request_context()
+            with agent_span(
+                name="a2a_execute",
+                agent_id=config.A2A_AGENT_ID,
                 protocol=self.protocol_label,
-            )
+                session_id=incoming.get("session_id") or context_id,
+                carrier=incoming.get("carrier"),
+            ) as span:
+                if span is not None:
+                    span.set_attribute("a2a.task.id", task_id)
+                    span.set_attribute("a2a.context.id", context_id)
+                record_content(span, "input", query)
+                answer = await asyncio.to_thread(run_sync,
+                    [{"role": "user", "content": query or ""}],
+                    protocol=self.protocol_label,
+                )
+                record_content(span, "output", answer)
         except Exception as exc:  # noqa: BLE001
             logger.exception("A2A agent execution failed")
             fail_msg = updater.new_agent_message(parts=[_text_part(str(exc))])

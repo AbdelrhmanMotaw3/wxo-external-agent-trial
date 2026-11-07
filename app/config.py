@@ -16,11 +16,13 @@ def env(name: str, default: str | None = None) -> str | None:
     return value
 
 
-PUBLIC_URL = (env("PUBLIC_URL", "http://localhost:8080") or "http://localhost:8080").rstrip(
-    "/"
-)
+PUBLIC_URL = (
+    env("PUBLIC_URL", "http://localhost:8080") or "http://localhost:8080"
+).rstrip("/")
 AGENT_PROFILE = env("AGENT_PROFILE", "trial")
-AGENT_AUTH_TOKEN = env("AGENT_AUTH_TOKEN", "change-me-trial-token") or "change-me-trial-token"
+AGENT_AUTH_TOKEN = (
+    env("AGENT_AUTH_TOKEN", "change-me-trial-token") or "change-me-trial-token"
+)
 OPENROUTER_API_KEY = env("OPENROUTER_API_KEY")
 OPENROUTER_BASE_URL = env("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1") or (
     "https://openrouter.ai/api/v1"
@@ -44,5 +46,18 @@ TOKEN_URL = env("TOKEN_URL", "https://iam.cloud.ibm.com/identity/token")
 X_API_KEY = env("X_API_KEY")
 MCSP_V2_TOKEN_URL = env("MCSP_V2_TOKEN_URL")
 
-SERVICE_NAME = env("SERVICE_NAME", "wxo-external-agent-trial") or "wxo-external-agent-trial"
+SERVICE_NAME = (
+    env("SERVICE_NAME", "wxo-external-agent-trial") or "wxo-external-agent-trial"
+)
 SERVICE_VERSION = env("SERVICE_VERSION", "1.0.0") or "1.0.0"
+
+# Content capture is optional; IDs, timings, status and usage remain available.
+TRACE_CAPTURE_CONTENT = (
+    env("TRACE_CAPTURE_CONTENT", "false") or "false"
+).lower() == "true"
+TRACE_MAX_CONTENT_CHARS = max(
+    256, int(env("TRACE_MAX_CONTENT_CHARS", "16000") or "16000")
+)
+OTEL_EXPORT_TIMEOUT_SECONDS = float(env("OTEL_EXPORT_TIMEOUT_SECONDS", "10") or "10")
+OTEL_FLUSH_TIMEOUT_MS = int(env("OTEL_FLUSH_TIMEOUT_MS", "2000") or "2000")
+WORKSPACE_ID = env("WORKSPACE_ID")

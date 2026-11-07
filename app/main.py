@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import asyncio
 import uuid
 from typing import Any, Optional
 
@@ -15,7 +16,7 @@ from app.auth import require_agent_auth
 from app.a2a_server import mount_a2a_routes
 from app.chat import ChatCompletionRequest, stream_chat_completions, sync_chat_completion
 from app.graph import run_sync
-from app.tracing import agent_span, setup_tracing
+from app.tracing import TraceContextMiddleware, agent_span, record_content, setup_tracing, shutdown_tracing
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,6 +39,11 @@ async def on_startup() -> None:
     setup_tracing()
     logger.info("Public URL: %s", config.PUBLIC_URL)
     logger.info("Default model: %s", config.OPENROUTER_MODEL)
+
+
+@app.on_event("shutdown")
+async def on_shutdown() -> None:
+    await asyncio.to_thread(shutdown_tracing)
 
 
 # A2A routes are required. Fail startup if they cannot be mounted.
@@ -127,13 +133,22 @@ async def chat_completions(
                 protocol="chat_completions",
                 session_id=thread_id,
                 carrier=carrier,
-            ):
+            ) as span:
+                record_content(span, "input", [m.model_dump() for m in request_body.messages])
+                answer_parts = []
                 async for chunk in stream_chat_completions(
                     request_body,
                     thread_id=thread_id,
                     protocol="chat_completions",
                 ):
+                    if config.TRACE_CAPTURE_CONTENT and len(''.join(answer_parts)) < config.TRACE_MAX_CONTENT_CHARS:
+                        import json
+                        if chunk.startswith('data: '):
+                            event = json.loads(chunk[6:])
+                            if event.get('object') == 'thread.message.delta':
+                                answer_parts.append(event['choices'][0]['delta'].get('content', ''))
                     yield chunk
+                record_content(span, "output", ''.join(answer_parts))
 
         return StreamingResponse(event_generator(), media_type="text/event-stream")
 
@@ -143,8 +158,10 @@ async def chat_completions(
         protocol="chat_completions",
         session_id=thread_id,
         carrier=carrier,
-    ):
-        response = sync_chat_completion(request_body, protocol="chat_completions")
+    ) as span:
+        record_content(span, "input", [m.model_dump() for m in request_body.messages])
+        response = await asyncio.to_thread(sync_chat_completion, request_body, protocol="chat_completions")
+        record_content(span, "output", response.choices[0].message.content)
     return JSONResponse(content=response.model_dump())
 
 
@@ -164,11 +181,13 @@ async def demo_chat(body: DemoRequest, request: Request):
         protocol="chat_completions_obs_only",
         session_id=session_id,
         carrier=_carrier_from_request(request),
-    ):
-        answer = run_sync(
+    ) as span:
+        record_content(span, "input", body.message)
+        answer = await asyncio.to_thread(run_sync,
             [{"role": "user", "content": body.message}],
             protocol="chat_completions_obs_only",
         )
+        record_content(span, "output", answer)
     return {
         "agent_id": agent_id,
         "session_id": session_id,
@@ -193,11 +212,13 @@ async def demo_a2a(body: DemoRequest, request: Request):
         protocol="a2a_obs_only",
         session_id=session_id,
         carrier=_carrier_from_request(request),
-    ):
-        answer = run_sync(
+    ) as span:
+        record_content(span, "input", body.message)
+        answer = await asyncio.to_thread(run_sync,
             [{"role": "user", "content": body.message}],
             protocol="a2a_obs_only",
         )
+        record_content(span, "output", answer)
     return {
         "agent_id": agent_id,
         "session_id": session_id,
@@ -206,15 +227,6 @@ async def demo_a2a(body: DemoRequest, request: Request):
     }
 
 
-# Wrap A2A JSON-RPC handling with use-and-observability tracing when possible.
-@app.middleware("http")
-async def a2a_trace_middleware(request: Request, call_next):
-    if request.url.path == "/" and request.method.upper() == "POST" and config.A2A_AGENT_ID:
-        with agent_span(
-            name="a2a_jsonrpc",
-            agent_id=config.A2A_AGENT_ID,
-            protocol="a2a",
-            carrier=_carrier_from_request(request),
-        ):
-            return await call_next(request)
-    return await call_next(request)
+# A2A spans live in the executor, so streaming/background tasks cannot outlive
+# their execution span. This outer ASGI middleware carries only trace context.
+app.add_middleware(TraceContextMiddleware)

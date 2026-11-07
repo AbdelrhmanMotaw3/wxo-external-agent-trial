@@ -13,6 +13,7 @@ from langgraph.prebuilt import create_react_agent
 
 from app import config
 from app.telecom import SPECIALISTS, evidence_footer
+from app.tracing import graph_execution
 
 if config.AGENT_PROFILE != "trial" and config.AGENT_PROFILE not in SPECIALISTS:
     raise ValueError(f"Unsupported AGENT_PROFILE: {config.AGENT_PROFILE}")
@@ -55,6 +56,8 @@ def build_llm(model: str | None = None) -> ChatOpenAI:
         base_url=config.OPENROUTER_BASE_URL,
         temperature=0,
         streaming=True,
+        # Custom API base URLs do not automatically request final usage chunks.
+        stream_usage=True,
     )
 
 
@@ -103,7 +106,8 @@ def to_langchain_messages(
 def run_sync(messages: list[Any], protocol: str, model: str | None = None) -> str:
     graph = get_graph(model or config.OPENROUTER_MODEL)
     inputs = {"messages": to_langchain_messages(messages, protocol)}
-    result = graph.invoke(inputs)
+    with graph_execution(model or config.OPENROUTER_MODEL) as callbacks:
+        result = graph.invoke(inputs, config={"callbacks": callbacks})
     last = result["messages"][-1]
     content = getattr(last, "content", "")
     if isinstance(content, list):
@@ -123,5 +127,6 @@ def run_sync(messages: list[Any], protocol: str, model: str | None = None) -> st
 async def astream_events(messages: list[Any], protocol: str, model: str | None = None):
     graph = get_graph(model or config.OPENROUTER_MODEL)
     inputs = {"messages": to_langchain_messages(messages, protocol)}
-    async for event in graph.astream_events(inputs, version="v2"):
-        yield event
+    with graph_execution(model or config.OPENROUTER_MODEL) as callbacks:
+        async for event in graph.astream_events(inputs, config={"callbacks": callbacks}, version="v2"):
+            yield event

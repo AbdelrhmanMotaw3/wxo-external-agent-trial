@@ -161,6 +161,10 @@ Check **Analyze → [agent] → Overview / Conversations**.
 
 ## Trace env reference
 
+For the IBM Cloud implementation, actual model/tool spans, automatic IAM token refresh,
+runtime secret configuration, verification, and rollback, see
+[IBM Cloud tracing](docs/IBM_CLOUD_TRACING.md).
+
 | Variable | Role |
 | --- | --- |
 | `TENANT_ID` | From instance CRN / `WO_Meta` |
@@ -169,7 +173,9 @@ Check **Analyze → [agent] → Overview / Conversations**.
 | `API_KEY` + `TOKEN_URL` | IBM Cloud IAM |
 | `AUTH_TYPE=MCSP_v2` + `X_API_KEY` + `MCSP_V2_TOKEN_URL` | MCSP v2 |
 
-When Orchestrate invokes the service it may send `traceparent`; the app continues that context so spans nest under the platform trace.
+When Orchestrate invokes the service it may send `traceparent`; the app continues
+that context. A shared platform/external trace must be verified, not assumed.
+Chat SSE tool events are a separate channel from exported OpenTelemetry spans.
 
 ## Project layout
 
