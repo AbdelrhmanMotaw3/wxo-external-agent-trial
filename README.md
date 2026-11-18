@@ -1,5 +1,7 @@
 # watsonx Orchestrate external agent trials
 
+For the bilingual internet-outage compensation event scenario, see [the Orchestrate filming package](orchestrate/outage/README.md). Existing trial, account and network profiles remain available.
+
 One FastAPI + LangGraph service that watsonx Orchestrate can call over:
 
 - **Chat completions** (`POST /chat/completions`, SSE streaming)

@@ -1,0 +1,1083 @@
+{
+  "spec": {
+    "kind": "flow",
+    "name": "kai_outage_credit_workflow_20261118",
+    "display_name": "Outage credit approval / اعتماد تعويض الانقطاع",
+    "description": "Assess synthetic outage credit, pause for a real human decision, revalidate and post once. Workflow form approval is required even if chat says approved.",
+    "input_schema": {
+      "$ref": "#/schemas/kai_outage_credit_workflow_20261118_input"
+    },
+    "output_schema": {
+      "$ref": "#/schemas/Result"
+    },
+    "schedulable": false,
+    "suppress_agent_summarization": false
+  },
+  "nodes": {
+    "prepare": {
+      "spec": {
+        "kind": "tool",
+        "name": "prepare",
+        "display_name": "Verify evidence & calculate / التحقق والحساب",
+        "input_schema": {
+          "$ref": "#/schemas/prepare_input"
+        },
+        "output_schema": {
+          "$ref": "#/schemas/Quote"
+        },
+        "tool": "kai_outage_prepare_quote"
+      },
+      "input_map": {
+        "spec": {
+          "maps": [
+            {
+              "target_variable": "self.input.case_id",
+              "value_expression": "flow.input.case_id",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "policy_review": {
+      "spec": {
+        "kind": "agent",
+        "name": "policy_review",
+        "display_name": "Retrieve policy / مراجعة السياسة",
+        "input_schema": {
+          "$ref": "#/schemas/policy_review_input"
+        },
+        "output_schema": {
+          "$ref": "#/schemas/PolicyReview"
+        },
+        "message": "Search your knowledge source and review this quote against the outage policy. Explain the relevant sections and whether supervisor approval is needed. Return policy_review with the policy ID and sections. Do not post a credit.",
+        "agent": "kai_outage_policy_agent_20261118",
+        "thread_control_policy": "REUSE_AND_CORRELATE"
+      },
+      "input_map": {
+        "spec": {
+          "maps": [
+            {
+              "target_variable": "self.input.case_id",
+              "value_expression": "flow.prepare.output.case_id",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            },
+            {
+              "target_variable": "self.input.quote_id",
+              "value_expression": "flow.prepare.output.quote_id",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            },
+            {
+              "target_variable": "self.input.credit_egp",
+              "value_expression": "flow.prepare.output.credit_egp",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            },
+            {
+              "target_variable": "self.input.invoice_before_egp",
+              "value_expression": "flow.prepare.output.invoice_before_egp",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            },
+            {
+              "target_variable": "self.input.invoice_after_egp",
+              "value_expression": "flow.prepare.output.invoice_after_egp",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            },
+            {
+              "target_variable": "self.input.confirmed_hours",
+              "value_expression": "flow.prepare.output.confirmed_hours",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            },
+            {
+              "target_variable": "self.input.requires_approval",
+              "value_expression": "flow.prepare.output.requires_approval",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            },
+            {
+              "target_variable": "self.input.policy_version",
+              "value_expression": "flow.prepare.output.policy_version",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "approval": {
+      "spec": {
+        "kind": "user_flow",
+        "name": "approval",
+        "display_name": "Human approval / الموافقة البشرية",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "assignees": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "wxo-user"
+              }
+            }
+          },
+          "required": []
+        },
+        "initiators": [
+          "__any_user__"
+        ],
+        "schedulable": false,
+        "owners": [
+          "__any_user__"
+        ],
+        "assignment_policy": "data_map"
+      },
+      "input_map": {
+        "spec": {
+          "maps": [
+            {
+              "target_variable": "self.input.assignees",
+              "value_expression": "[\"IBMid-698000U0QU\"]",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "literal"
+              }
+            }
+          ]
+        }
+      },
+      "nodes": {
+        "decision": {
+          "spec": {
+            "kind": "user",
+            "name": "decision",
+            "display_name": "Review the credit / راجع التعويض",
+            "description": "Demo only / بيانات تجريبية. Supervisor requested: amotawea@isys.ai. Review the quote and decide; chat approval is insufficient / راجع العرض واختار القرار.",
+            "owners": [
+              "__current_user__"
+            ],
+            "fields": [],
+            "form": {
+              "name": "decision",
+              "kind": "form",
+              "display_name": "Review the credit / راجع التعويض",
+              "fields": [
+                {
+                  "name": "review_case_id",
+                  "kind": "field",
+                  "direction": "output",
+                  "display_name": "Case / الشكوى",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.value",
+                          "value_expression": "flow.prepare.output.case_id",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {}
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "DataWidget",
+                    "ui:options": {
+                      "label": true
+                    },
+                    "ui:title": "Case / الشكوى"
+                  }
+                },
+                {
+                  "name": "review_quote_id",
+                  "kind": "field",
+                  "direction": "output",
+                  "display_name": "Quote / العرض",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.value",
+                          "value_expression": "flow.prepare.output.quote_id",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {}
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "DataWidget",
+                    "ui:options": {
+                      "label": true
+                    },
+                    "ui:title": "Quote / العرض"
+                  }
+                },
+                {
+                  "name": "review_confirmed_hours",
+                  "kind": "field",
+                  "direction": "output",
+                  "display_name": "Confirmed hours / ساعات الانقطاع",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.value",
+                          "value_expression": "flow.prepare.output.confirmed_hours",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {}
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "DataWidget",
+                    "ui:options": {
+                      "label": true
+                    },
+                    "ui:title": "Confirmed hours / ساعات الانقطاع"
+                  }
+                },
+                {
+                  "name": "review_credit_egp",
+                  "kind": "field",
+                  "direction": "output",
+                  "display_name": "Credit EGP / التعويض بالجنيه",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.value",
+                          "value_expression": "flow.prepare.output.credit_egp",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {}
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "DataWidget",
+                    "ui:options": {
+                      "label": true
+                    },
+                    "ui:title": "Credit EGP / التعويض بالجنيه"
+                  }
+                },
+                {
+                  "name": "review_invoice_before_egp",
+                  "kind": "field",
+                  "direction": "output",
+                  "display_name": "Invoice before EGP / الفاتورة قبل التعويض",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.value",
+                          "value_expression": "flow.prepare.output.invoice_before_egp",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {}
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "DataWidget",
+                    "ui:options": {
+                      "label": true
+                    },
+                    "ui:title": "Invoice before EGP / الفاتورة قبل التعويض"
+                  }
+                },
+                {
+                  "name": "review_invoice_after_egp",
+                  "kind": "field",
+                  "direction": "output",
+                  "display_name": "Invoice after EGP / الفاتورة بعد التعويض",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.value",
+                          "value_expression": "flow.prepare.output.invoice_after_egp",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {}
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "DataWidget",
+                    "ui:options": {
+                      "label": true
+                    },
+                    "ui:title": "Invoice after EGP / الفاتورة بعد التعويض"
+                  }
+                },
+                {
+                  "name": "review_policy_version",
+                  "kind": "field",
+                  "direction": "output",
+                  "display_name": "Policy / السياسة",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.value",
+                          "value_expression": "flow.prepare.output.policy_version",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {}
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "DataWidget",
+                    "ui:options": {
+                      "label": true
+                    },
+                    "ui:title": "Policy / السياسة"
+                  }
+                },
+                {
+                  "name": "approved",
+                  "kind": "boolean",
+                  "direction": "input",
+                  "display_name": "Your decision / اختار القرار",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.default",
+                          "value_expression": "False",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {
+                            "assignmentType": "literal"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "default": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [],
+                    "in_field": null
+                  },
+                  "output_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "RadioWidget",
+                    "ui:title": "Your decision / اختار القرار"
+                  }
+                }
+              ],
+              "jsonSchema": {
+                "type": "object",
+                "properties": {
+                  "review_case_id": {
+                    "type": "string",
+                    "title": "Case / الشكوى"
+                  },
+                  "review_quote_id": {
+                    "type": "string",
+                    "title": "Quote / العرض"
+                  },
+                  "review_confirmed_hours": {
+                    "type": "string",
+                    "title": "Confirmed hours / ساعات الانقطاع"
+                  },
+                  "review_credit_egp": {
+                    "type": "string",
+                    "title": "Credit EGP / التعويض بالجنيه"
+                  },
+                  "review_invoice_before_egp": {
+                    "type": "string",
+                    "title": "Invoice before EGP / الفاتورة قبل التعويض"
+                  },
+                  "review_invoice_after_egp": {
+                    "type": "string",
+                    "title": "Invoice after EGP / الفاتورة بعد التعويض"
+                  },
+                  "review_policy_version": {
+                    "type": "string",
+                    "title": "Policy / السياسة"
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "title": "Your decision / اختار القرار",
+                    "oneOf": [
+                      {
+                        "const": true,
+                        "title": "Approve / موافقة"
+                      },
+                      {
+                        "const": false,
+                        "title": "Reject / رفض"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "approved"
+                ]
+              },
+              "buttons": [
+                {
+                  "name": "submit",
+                  "kind": "submit",
+                  "display_name": "Record decision / سجّل القرار",
+                  "visible": true
+                },
+                {
+                  "name": "cancel",
+                  "kind": "cancel",
+                  "display_name": "Cancel",
+                  "visible": false
+                }
+              ]
+            }
+          }
+        },
+        "__start__": {
+          "spec": {
+            "kind": "start",
+            "name": "__start__",
+            "display_name": "__start__"
+          }
+        },
+        "__end__": {
+          "spec": {
+            "kind": "end",
+            "name": "__end__",
+            "display_name": "__end__"
+          }
+        }
+      },
+      "edges": [
+        {
+          "start": "__start__",
+          "end": "decision"
+        },
+        {
+          "start": "decision",
+          "end": "__end__"
+        }
+      ],
+      "schemas": {},
+      "metadata": {}
+    },
+    "record_decision": {
+      "spec": {
+        "kind": "tool",
+        "name": "record_decision",
+        "display_name": "Revalidate & record / التحقق وتسجيل القرار",
+        "input_schema": {
+          "$ref": "#/schemas/record_decision_input"
+        },
+        "output_schema": {
+          "$ref": "#/schemas/Result"
+        },
+        "tool": "kai_outage_workflow_decide"
+      },
+      "input_map": {
+        "spec": {
+          "maps": [
+            {
+              "target_variable": "self.input.quote_id",
+              "value_expression": "flow.prepare.output.quote_id",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            },
+            {
+              "target_variable": "self.input.approved",
+              "value_expression": "flow.approval.decision.output.approved",
+              "has_no_value": false,
+              "default_value": null,
+              "metadata": {
+                "assignmentType": "pyExpression"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "__start__": {
+      "spec": {
+        "kind": "start",
+        "name": "__start__",
+        "display_name": "__start__"
+      }
+    },
+    "__end__": {
+      "spec": {
+        "kind": "end",
+        "name": "__end__",
+        "display_name": "__end__"
+      }
+    }
+  },
+  "edges": [
+    {
+      "start": "__start__",
+      "end": "prepare"
+    },
+    {
+      "start": "prepare",
+      "end": "policy_review"
+    },
+    {
+      "start": "policy_review",
+      "end": "approval"
+    },
+    {
+      "start": "approval",
+      "end": "record_decision"
+    },
+    {
+      "start": "record_decision",
+      "end": "__end__"
+    }
+  ],
+  "schemas": {
+    "kai_outage_credit_workflow_20261118_input": {
+      "type": "object",
+      "title": "kai_outage_credit_workflow_20261118_input",
+      "required": [
+        "case_id"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "title": "Case Id"
+        }
+      }
+    },
+    "Result": {
+      "type": "object",
+      "title": "Result",
+      "required": [
+        "status",
+        "case_id",
+        "quote_id"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "title": "Status"
+        },
+        "case_id": {
+          "type": "string",
+          "title": "Case Id"
+        },
+        "quote_id": {
+          "type": "string",
+          "title": "Quote Id"
+        },
+        "receipt_id": {
+          "type": "string",
+          "title": "Receipt Id",
+          "default": ""
+        },
+        "credit_egp": {
+          "type": "number",
+          "title": "Credit Egp",
+          "default": 0
+        },
+        "invoice_after_egp": {
+          "type": "number",
+          "title": "Invoice After Egp",
+          "default": 0
+        }
+      }
+    },
+    "prepare_input": {
+      "type": "object",
+      "title": "prepare_input",
+      "required": [
+        "case_id"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "title": "Case Id"
+        }
+      }
+    },
+    "Quote": {
+      "type": "object",
+      "title": "Quote",
+      "required": [
+        "case_id",
+        "quote_id",
+        "credit_egp",
+        "invoice_before_egp",
+        "invoice_after_egp",
+        "confirmed_hours",
+        "requires_approval",
+        "policy_version"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "title": "Case Id"
+        },
+        "quote_id": {
+          "type": "string",
+          "title": "Quote Id"
+        },
+        "credit_egp": {
+          "type": "number",
+          "title": "Credit Egp"
+        },
+        "invoice_before_egp": {
+          "type": "number",
+          "title": "Invoice Before Egp"
+        },
+        "invoice_after_egp": {
+          "type": "number",
+          "title": "Invoice After Egp"
+        },
+        "confirmed_hours": {
+          "type": "number",
+          "title": "Confirmed Hours"
+        },
+        "requires_approval": {
+          "type": "boolean",
+          "title": "Requires Approval"
+        },
+        "policy_version": {
+          "type": "string",
+          "title": "Policy Version"
+        }
+      }
+    },
+    "policy_review_input": {
+      "type": "object",
+      "title": "policy_review_input",
+      "required": [
+        "case_id",
+        "quote_id",
+        "credit_egp",
+        "invoice_before_egp",
+        "invoice_after_egp",
+        "confirmed_hours",
+        "requires_approval",
+        "policy_version"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "title": "Case Id"
+        },
+        "quote_id": {
+          "type": "string",
+          "title": "Quote Id"
+        },
+        "credit_egp": {
+          "type": "number",
+          "title": "Credit Egp"
+        },
+        "invoice_before_egp": {
+          "type": "number",
+          "title": "Invoice Before Egp"
+        },
+        "invoice_after_egp": {
+          "type": "number",
+          "title": "Invoice After Egp"
+        },
+        "confirmed_hours": {
+          "type": "number",
+          "title": "Confirmed Hours"
+        },
+        "requires_approval": {
+          "type": "boolean",
+          "title": "Requires Approval"
+        },
+        "policy_version": {
+          "type": "string",
+          "title": "Policy Version"
+        }
+      }
+    },
+    "PolicyReview": {
+      "type": "object",
+      "title": "PolicyReview",
+      "required": [
+        "policy_review"
+      ],
+      "properties": {
+        "policy_review": {
+          "type": "string",
+          "title": "Policy Review"
+        }
+      }
+    },
+    "approval_input": {
+      "type": "object",
+      "title": "approval_input",
+      "required": [
+        "case_id",
+        "quote_id",
+        "credit_egp",
+        "invoice_before_egp",
+        "invoice_after_egp",
+        "confirmed_hours",
+        "requires_approval",
+        "policy_version"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "title": "Case Id"
+        },
+        "quote_id": {
+          "type": "string",
+          "title": "Quote Id"
+        },
+        "credit_egp": {
+          "type": "number",
+          "title": "Credit Egp"
+        },
+        "invoice_before_egp": {
+          "type": "number",
+          "title": "Invoice Before Egp"
+        },
+        "invoice_after_egp": {
+          "type": "number",
+          "title": "Invoice After Egp"
+        },
+        "confirmed_hours": {
+          "type": "number",
+          "title": "Confirmed Hours"
+        },
+        "requires_approval": {
+          "type": "boolean",
+          "title": "Requires Approval"
+        },
+        "policy_version": {
+          "type": "string",
+          "title": "Policy Version"
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "title": "decision",
+      "description": "Demo only / بيانات تجريبية. Supervisor requested: amotawea@isys.ai. Review the quote and decide; chat approval is insufficient / راجع العرض واختار القرار.",
+      "properties": {}
+    },
+    "record_decision_input": {
+      "type": "object",
+      "title": "record_decision_input",
+      "required": [
+        "quote_id",
+        "approved"
+      ],
+      "properties": {
+        "quote_id": {
+          "type": "string",
+          "title": "Quote Id"
+        },
+        "approved": {
+          "type": "boolean",
+          "title": "Approved"
+        }
+      }
+    }
+  },
+  "metadata": {
+    "source_kind": "adk/python"
+  },
+  "output_map": {
+    "spec": {
+      "maps": [
+        {
+          "target_variable": "flow.output.status",
+          "value_expression": "flow.record_decision.output.status",
+          "has_no_value": false,
+          "default_value": null,
+          "metadata": {
+            "assignmentType": "pyExpression"
+          }
+        },
+        {
+          "target_variable": "flow.output.case_id",
+          "value_expression": "flow.record_decision.output.case_id",
+          "has_no_value": false,
+          "default_value": null,
+          "metadata": {
+            "assignmentType": "pyExpression"
+          }
+        },
+        {
+          "target_variable": "flow.output.quote_id",
+          "value_expression": "flow.record_decision.output.quote_id",
+          "has_no_value": false,
+          "default_value": null,
+          "metadata": {
+            "assignmentType": "pyExpression"
+          }
+        },
+        {
+          "target_variable": "flow.output.receipt_id",
+          "value_expression": "flow.record_decision.output.receipt_id",
+          "has_no_value": false,
+          "default_value": null,
+          "metadata": {
+            "assignmentType": "pyExpression"
+          }
+        },
+        {
+          "target_variable": "flow.output.credit_egp",
+          "value_expression": "flow.record_decision.output.credit_egp",
+          "has_no_value": false,
+          "default_value": null,
+          "metadata": {
+            "assignmentType": "pyExpression"
+          }
+        },
+        {
+          "target_variable": "flow.output.invoice_after_egp",
+          "value_expression": "flow.record_decision.output.invoice_after_egp",
+          "has_no_value": false,
+          "default_value": null,
+          "metadata": {
+            "assignmentType": "pyExpression"
+          }
+        }
+      ]
+    }
+  }
+}

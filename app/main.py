@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from app import config
+from app.outage_api import router as outage_router
 from app.auth import require_agent_auth
 from app.a2a_server import mount_a2a_routes
 from app.chat import ChatCompletionRequest, stream_chat_completions, sync_chat_completion
@@ -32,6 +33,7 @@ app = FastAPI(
         "with OpenRouter LLM and OTLP traces to watsonx Orchestrate."
     ),
 )
+app.include_router(outage_router)
 
 
 @app.on_event("startup")
@@ -108,6 +110,7 @@ async def health() -> dict[str, Any]:
         "service": config.SERVICE_NAME,
         "model": config.OPENROUTER_MODEL,
         "public_url": config.PUBLIC_URL,
+        "outage_demo_version": "2026-11-18-v1",
     }
     if config.AGENT_PROFILE != "trial":
         health_data["agent_profile"] = config.AGENT_PROFILE

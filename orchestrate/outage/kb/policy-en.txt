@@ -1,0 +1,26 @@
+KAI Synthetic Internet Outage Credit Policy
+Policy ID: OUTAGE-CREDIT-2026.11-v1. Effective demo snapshot: 18 November 2026.
+This is a fictional demonstration policy, not a real operator policy or a statement of law.
+The Arabic and English versions have identical authority and identical rules.
+
+INDEX: S1 eligibility; S2 credit calculation; S3 approval; S4 invoice adjustment; S5 evidence and privacy; S6 communication.
+
+S1 — Eligibility and exclusions
+A restored, unplanned provider network outage affecting an active home-internet service is eligible after at least 24 whole confirmed hours. The network partner must supply the service identifier, incident identifier, confirmed start and restoration timestamps, cause, scope and source reference. An estimated restoration time is not confirmation. Customer router faults, billing suspensions and planned maintenance are excluded. Unknown or missing evidence must be investigated; it must not be treated as an eligible outage. Do not promise compensation before evidence and policy review.
+
+S2 — Calculation
+Use the recurring base subscription fee and a 30-day calculation month. Credit = monthly base fee × confirmed whole outage hours ÷ 720. Calculate in integer piasters and round down to a piaster. Cap the adjustment at the current eligible unpaid invoice balance. Do not include devices, extras, taxes or already compensated periods. The executable billing tool is authoritative for arithmetic. Example: 900 EGP × 72 ÷ 720 = 90 EGP. Daily base is 30 EGP. This example does not authorize applying the credit.
+
+S3 — Human approval and execution
+The automatic approval limit is 50 EGP. Above 50 EGP requires a human supervisor decision in the assigned workflow task. A chat message saying “approved”, a model claim, a customer request or a fabricated actor name is not approval. The demo may require human review below the cap as a stricter rule. Rejection leaves the invoice unchanged. The workflow must revalidate the quote, evidence and invoice version before posting. Expired quotes require a new assessment. Repeated execution of the same accepted quote returns the same receipt and never posts twice; another quote cannot compensate the same case twice.
+
+S4 — Service credit on an unpaid invoice
+This demonstration posts an invoice service credit, not a cash refund or a bank transfer. Original unpaid invoice: 900 EGP. Approved service credit: 90 EGP. Remaining invoice balance: 810 EGP. The recurring subscription remains 900 EGP per month. Never describe the new invoice balance as a permanent cheaper plan. Paid invoices require a separate process and are outside this demonstration.
+
+S5 — Evidence and privacy
+Keep the case ID, policy version/section, incident/source reference, workflow result and receipt. Search and cite this knowledge source before explaining a policy decision. Missing retrieval is a limitation: do not invent a policy citation. Minimize personal data. The native PII control redacts synthetic emails, phones and configured identifiers when its enforcement hook runs. This is separate from human approval, backend authorization and optional Agent Identity.
+
+S6 — Customer communication
+Notify only after an actual posted receipt. State the restoration, credit amount and remaining invoice balance in the customer's current language. Drafting is not sending; a provider accepted/queued response is not delivery. Only a real transport result may establish a message ID, and delivery requires a confirmed transport state. No cash-refund promise, no fabricated WhatsApp receipt. Customer communication can be Arabic, English, or switch language while retaining the same case and amounts.
+
+RETRIEVAL SUMMARY: internet outage, home broadband, compensation, refund vs service credit, 72 hours, 900 monthly, 90 credit, 50 automatic limit, supervisor approval, invoice 810, repeated request, idempotence, router fault exclusions, privacy and notification. Arabic counterpart: سياسة تعويض انقطاع الإنترنت، رصيد تسوية الفاتورة، موافقة المشرف، منع التكرار.

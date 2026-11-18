@@ -44,6 +44,10 @@ def check_application(profile):
             "Network Service Agent", "get_active_incidents",
             {"area_id": "AREA-003", "service": "home_internet"}, "incidents.json#INC-024",
         ),
+        "outage_partner": (
+            "Outage Network Partner", "get_outage_evidence",
+            {"service_id": "SVC-NOUR-001"}, "partner-network#INC-PARTNER-721",
+        ),
     }
     title, tool, args, reference = expected[profile]
     turns = [
@@ -103,7 +107,7 @@ def check_application(profile):
 
 class TelecomLabTests(unittest.TestCase):
     def test_both_adapters_and_original_profile(self):
-        for profile in ("trial", "customer_account", "network_service"):
+        for profile in ("trial", "customer_account", "network_service", "outage_partner"):
             with self.subTest(profile=profile):
                 env = {
                     **os.environ, "AGENT_PROFILE": profile, "AGENT_AUTH_TOKEN": "local-test-secret",

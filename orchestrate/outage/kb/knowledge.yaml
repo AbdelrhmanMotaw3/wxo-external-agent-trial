@@ -1,0 +1,16 @@
+spec_version: v1
+kind: knowledge_base
+name: kai_outage_policy_20261118
+description: Bilingual Arabic and English fictional home-internet outage credit policy. Eligibility, exclusions, calculation, human approval, invoice credit, privacy and customer notifications. سياسة تعويض انقطاع الإنترنت وموافقة المشرف.
+documents:
+  - policy-en.txt
+  - policy-ar.txt
+vector_index:
+  embeddings_model_name: ibm/granite-embedding-278m-multilingual
+  chunk_size: 1600
+  chunk_overlap: 200
+conversational_search_tool:
+  query_source: Agent
+  generation:
+    enabled: false
+representation: tool

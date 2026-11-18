@@ -1,0 +1,25 @@
+spec_version: v1
+kind: control
+control:
+  artifact_name: pii_filter
+  name: kai_outage_pii_20261118
+  display_name: KAI Outage Privacy — حماية البيانات
+  description: Native redaction on new outage demo agents only. Independent of workflow approval and optional Agent Identity.
+  hooks:
+    - agent_pre_invoke
+    - agent_post_invoke
+  priority: 100
+  config:
+    detect_email: true
+    detect_phone: true
+    custom_patterns:
+      - 'DEMO-NID-[0-9]{14}'
+    default_mask_strategy: redact
+    redaction_text: '[REDACTED / محجوب]'
+    block_on_detection: false
+    log_detections: false
+    include_detection_details: true
+  agent_names:
+    - kai_outage_case_copilot_20261118
+    - kai_outage_policy_agent_20261118
+    - kai_outage_communications_20261118
