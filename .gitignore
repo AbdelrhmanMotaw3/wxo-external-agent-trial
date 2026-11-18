@@ -1,5 +1,6 @@
 .env
 .venv/
+.flow-venv/
 venv/
 __pycache__/
 *.pyc

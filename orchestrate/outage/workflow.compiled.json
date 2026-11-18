@@ -2,7 +2,7 @@
   "spec": {
     "kind": "flow",
     "name": "kai_outage_credit_workflow_20261118",
-    "display_name": "Outage credit approval / اعتماد تعويض الانقطاع",
+    "display_name": "Outage Credit Approval",
     "description": "Assess synthetic outage credit, pause for a real human decision, revalidate and post once. Workflow form approval is required even if chat says approved.",
     "input_schema": {
       "$ref": "#/schemas/kai_outage_credit_workflow_20261118_input"
@@ -18,7 +18,7 @@
       "spec": {
         "kind": "tool",
         "name": "prepare",
-        "display_name": "Verify evidence & calculate / التحقق والحساب",
+        "display_name": "Verify Evidence and Calculate Credit",
         "input_schema": {
           "$ref": "#/schemas/prepare_input"
         },
@@ -47,7 +47,7 @@
       "spec": {
         "kind": "agent",
         "name": "policy_review",
-        "display_name": "Retrieve policy / مراجعة السياسة",
+        "display_name": "Review Compensation Policy",
         "input_schema": {
           "$ref": "#/schemas/policy_review_input"
         },
@@ -141,7 +141,7 @@
       "spec": {
         "kind": "user_flow",
         "name": "approval",
-        "display_name": "Human approval / الموافقة البشرية",
+        "display_name": "Human Approval",
         "input_schema": {
           "type": "object",
           "properties": {
@@ -184,8 +184,8 @@
           "spec": {
             "kind": "user",
             "name": "decision",
-            "display_name": "Review the credit / راجع التعويض",
-            "description": "Demo only / بيانات تجريبية. Supervisor requested: amotawea@isys.ai. Review the quote and decide; chat approval is insufficient / راجع العرض واختار القرار.",
+            "display_name": "Review Service Credit",
+            "description": "Review the proposed service credit and record your decision. Synthetic demonstration data.",
             "owners": [
               "__current_user__"
             ],
@@ -193,13 +193,13 @@
             "form": {
               "name": "decision",
               "kind": "form",
-              "display_name": "Review the credit / راجع التعويض",
+              "display_name": "Review Service Credit",
               "fields": [
                 {
                   "name": "review_case_id",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Case / الشكوى",
+                  "display_name": "Case ID",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -243,14 +243,14 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Case / الشكوى"
+                    "ui:title": "Case ID"
                   }
                 },
                 {
                   "name": "review_quote_id",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Quote / العرض",
+                  "display_name": "Quote ID",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -294,14 +294,14 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Quote / العرض"
+                    "ui:title": "Quote ID"
                   }
                 },
                 {
                   "name": "review_confirmed_hours",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Confirmed hours / ساعات الانقطاع",
+                  "display_name": "Confirmed Outage Hours",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -345,14 +345,14 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Confirmed hours / ساعات الانقطاع"
+                    "ui:title": "Confirmed Outage Hours"
                   }
                 },
                 {
                   "name": "review_credit_egp",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Credit EGP / التعويض بالجنيه",
+                  "display_name": "Proposed Credit (EGP)",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -396,14 +396,14 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Credit EGP / التعويض بالجنيه"
+                    "ui:title": "Proposed Credit (EGP)"
                   }
                 },
                 {
                   "name": "review_invoice_before_egp",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Invoice before EGP / الفاتورة قبل التعويض",
+                  "display_name": "Current Invoice (EGP)",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -447,14 +447,14 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Invoice before EGP / الفاتورة قبل التعويض"
+                    "ui:title": "Current Invoice (EGP)"
                   }
                 },
                 {
                   "name": "review_invoice_after_egp",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Invoice after EGP / الفاتورة بعد التعويض",
+                  "display_name": "Invoice After Approval (EGP)",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -498,14 +498,14 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Invoice after EGP / الفاتورة بعد التعويض"
+                    "ui:title": "Invoice After Approval (EGP)"
                   }
                 },
                 {
                   "name": "review_policy_version",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Policy / السياسة",
+                  "display_name": "Policy Reference",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -549,14 +549,14 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Policy / السياسة"
+                    "ui:title": "Policy Reference"
                   }
                 },
                 {
                   "name": "approved",
                   "kind": "boolean",
                   "direction": "input",
-                  "display_name": "Your decision / اختار القرار",
+                  "display_name": "Decision",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -596,7 +596,7 @@
                   },
                   "uiSchema": {
                     "ui:widget": "RadioWidget",
-                    "ui:title": "Your decision / اختار القرار"
+                    "ui:title": "Decision"
                   }
                 }
               ],
@@ -605,43 +605,43 @@
                 "properties": {
                   "review_case_id": {
                     "type": "string",
-                    "title": "Case / الشكوى"
+                    "title": "Case ID"
                   },
                   "review_quote_id": {
                     "type": "string",
-                    "title": "Quote / العرض"
+                    "title": "Quote ID"
                   },
                   "review_confirmed_hours": {
                     "type": "string",
-                    "title": "Confirmed hours / ساعات الانقطاع"
+                    "title": "Confirmed Outage Hours"
                   },
                   "review_credit_egp": {
                     "type": "string",
-                    "title": "Credit EGP / التعويض بالجنيه"
+                    "title": "Proposed Credit (EGP)"
                   },
                   "review_invoice_before_egp": {
                     "type": "string",
-                    "title": "Invoice before EGP / الفاتورة قبل التعويض"
+                    "title": "Current Invoice (EGP)"
                   },
                   "review_invoice_after_egp": {
                     "type": "string",
-                    "title": "Invoice after EGP / الفاتورة بعد التعويض"
+                    "title": "Invoice After Approval (EGP)"
                   },
                   "review_policy_version": {
                     "type": "string",
-                    "title": "Policy / السياسة"
+                    "title": "Policy Reference"
                   },
                   "approved": {
                     "type": "boolean",
-                    "title": "Your decision / اختار القرار",
+                    "title": "Decision",
                     "oneOf": [
                       {
                         "const": true,
-                        "title": "Approve / موافقة"
+                        "title": "Approve"
                       },
                       {
                         "const": false,
-                        "title": "Reject / رفض"
+                        "title": "Reject"
                       }
                     ]
                   }
@@ -654,7 +654,7 @@
                 {
                   "name": "submit",
                   "kind": "submit",
-                  "display_name": "Record decision / سجّل القرار",
+                  "display_name": "Record Decision",
                   "visible": true
                 },
                 {
@@ -699,7 +699,7 @@
       "spec": {
         "kind": "tool",
         "name": "record_decision",
-        "display_name": "Revalidate & record / التحقق وتسجيل القرار",
+        "display_name": "Revalidate and Record Decision",
         "input_schema": {
           "$ref": "#/schemas/record_decision_input"
         },
@@ -722,7 +722,7 @@
             },
             {
               "target_variable": "self.input.approved",
-              "value_expression": "flow.approval.decision.output.approved",
+              "value_expression": "flow.approval.output[\"Decision\"]",
               "has_no_value": false,
               "default_value": null,
               "metadata": {
@@ -995,7 +995,7 @@
     "decision": {
       "type": "object",
       "title": "decision",
-      "description": "Demo only / بيانات تجريبية. Supervisor requested: amotawea@isys.ai. Review the quote and decide; chat approval is insufficient / راجع العرض واختار القرار.",
+      "description": "Review the proposed service credit and record your decision. Synthetic demonstration data.",
       "properties": {}
     },
     "record_decision_input": {

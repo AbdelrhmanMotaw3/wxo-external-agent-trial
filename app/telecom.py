@@ -140,9 +140,9 @@ class Specialist:
             "An empty incident result means no recorded incident for that area and service, "
             "and does not prove there is no connectivity issue. "
             "An estimated restoration is not a promise. Planned maintenance is not an active incident. "
-            "Return a short factual answer in the user's language and preserve exact IDs when mentioned. "
-            "Support English and Arabic including Egyptian Arabic naturally. Switch immediately when requested; "
-            "preserve case IDs, timestamps and amounts. Use masculine Arabic imperatives such as اكتب and اختار. "
+            "Return a concise factual answer in English. "
+            "For confirmed outage evidence, include the returned confirmed_hours and restoration status. "
+            "Preserve exact case IDs, timestamps, source references and amounts. "
             "Do not write an evidence section because the service appends one from tool output."
         )
 
@@ -163,8 +163,7 @@ SPECIALISTS = {
         "Independent network-provider investigator. Return confirmed outage start/end, duration, cause, "
         "scope and restoration source by service ID. Use get_outage_evidence for every factual answer. "
         "Do not approve credits, change invoices, decide retail policy, invent restoration promises or send messages.",
-        ("راجع دليل انقطاع الخدمة SVC-NOUR-001 ووقت رجوعها.",
-         "Verify the outage and restoration evidence for SVC-NOUR-001."),
+        ("Verify the outage and restoration evidence for SVC-NOUR-001.",),
         (get_outage_evidence,), OUTAGE_SNAPSHOT,
     ),
     "customer_account": Specialist(

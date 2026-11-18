@@ -3,7 +3,7 @@ kind: control
 control:
   artifact_name: pii_filter
   name: kai_outage_pii_20261118
-  display_name: KAI Outage Privacy — حماية البيانات
+  display_name: KAI | Customer Data Privacy
   description: Native redaction on new outage demo agents only. Independent of workflow approval and optional Agent Identity.
   hooks:
     - agent_pre_invoke
@@ -14,8 +14,12 @@ control:
     detect_phone: true
     custom_patterns:
       - 'DEMO-NID-[0-9]{14}'
+    # Known non-personal demo references; do not exempt real phone numbers.
+    allowlist_patterns:
+      - 'OUTAGE-CREDIT-2026\.11-v1|ORDER-KAI-2048'
+      - '^(?:2026|2048)$'
     default_mask_strategy: redact
-    redaction_text: '[REDACTED / محجوب]'
+    redaction_text: '[REDACTED]'
     block_on_detection: false
     log_detections: false
     include_detection_details: true

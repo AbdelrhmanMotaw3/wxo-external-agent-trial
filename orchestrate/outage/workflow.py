@@ -41,24 +41,24 @@ class Result(BaseModel):
 
 
 @flow(name='kai_outage_credit_workflow_20261118',
-      display_name='Outage credit approval / اعتماد تعويض الانقطاع',
+      display_name='Outage Credit Approval',
       description='Assess synthetic outage credit, pause for a real human decision, revalidate and post once. Workflow form approval is required even if chat says approved.',
       input_schema=CaseInput, output_schema=Result, suppress_agent_summarization=False)
 def build_outage_credit(aflow: Flow) -> Flow:
     prepare = aflow.tool('kai_outage_prepare_quote', name='prepare',
-                         display_name='Verify evidence & calculate / التحقق والحساب',
+                         display_name='Verify Evidence and Calculate Credit',
                          input_schema=CaseInput, output_schema=Quote)
     prepare.map_input('case_id', 'flow.input.case_id')
 
     policy = aflow.agent(name='policy_review', agent='kai_outage_policy_agent_20261118',
-                         display_name='Retrieve policy / مراجعة السياسة',
+                         display_name='Review Compensation Policy',
                          message='Search your knowledge source and review this quote against the outage policy. Explain the relevant sections and whether supervisor approval is needed. Return policy_review with the policy ID and sections. Do not post a credit.',
                          input_schema=Quote, output_schema=PolicyReview)
     for field in Quote.model_fields:
         policy.map_input(field, 'flow.prepare.output.'+field)
 
     approval = aflow.userflow(name='approval', input_schema=Quote,
-                             display_name='Human approval / الموافقة البشرية')
+                             display_name='Human Approval')
     for field in Quote.model_fields:
         approval.map_input(field, 'flow.prepare.output.'+field)
     # Resolve the real tenant user identifier before setting this value. An email
@@ -68,29 +68,32 @@ def build_outage_credit(aflow: Flow) -> Flow:
         approval.assign_to(UserAssignmentPolicy.USER, assignees=json.dumps([approver]))
     else:
         approval.assign_to(UserAssignmentPolicy.FLOW_INITIATOR)
-    form = approval.form(name='decision', display_name='Review the credit / راجع التعويض',
-                         instructions='Demo only / بيانات تجريبية. Supervisor requested: amotawea@isys.ai. Review the quote and decide; chat approval is insufficient / راجع العرض واختار القرار.',
-                         submit_button_label='Record decision / سجّل القرار')
+    form = approval.form(name='decision', display_name='Review Service Credit',
+                         instructions='Review the proposed service credit and record your decision. Synthetic demonstration data.',
+                         submit_button_label='Record Decision')
     for name, label in [
-        ('case_id', 'Case / الشكوى'), ('quote_id', 'Quote / العرض'),
-        ('confirmed_hours', 'Confirmed hours / ساعات الانقطاع'),
-        ('credit_egp', 'Credit EGP / التعويض بالجنيه'),
-        ('invoice_before_egp', 'Invoice before EGP / الفاتورة قبل التعويض'),
-        ('invoice_after_egp', 'Invoice after EGP / الفاتورة بعد التعويض'),
-        ('policy_version', 'Policy / السياسة'),
+        ('case_id', 'Case ID'), ('quote_id', 'Quote ID'),
+        ('confirmed_hours', 'Confirmed Outage Hours'),
+        ('credit_egp', 'Proposed Credit (EGP)'),
+        ('invoice_before_egp', 'Current Invoice (EGP)'),
+        ('invoice_after_egp', 'Invoice After Approval (EGP)'),
+        ('policy_version', 'Policy Reference'),
     ]:
         form.field_output_field(name='review_'+name, label=label, value=DataMap(maps=[
             Assignment(target_variable='self.input.value', value_expression='flow.prepare.output.'+name)]))
-    form.boolean_input_field(name='approved', label='Your decision / اختار القرار',
+    form.boolean_input_field(name='approved', label='Decision',
                              single_checkbox=False, required=True,
-                             true_label='Approve / موافقة', false_label='Reject / رفض')
+                             true_label='Approve', false_label='Reject')
     approval.sequence(START, form, END)
 
     decision = aflow.tool('kai_outage_workflow_decide', name='record_decision',
-                          display_name='Revalidate & record / التحقق وتسجيل القرار',
+                          display_name='Revalidate and Record Decision',
                           input_schema=DecisionInput, output_schema=Result)
     decision.map_input('quote_id', 'flow.prepare.output.quote_id')
-    decision.map_input('approved', 'flow.approval.decision.output.approved')
+    # UserFlow exposes inferred form outputs under their displayed labels.
+    # Verified against the native completed task; nested form IDs are not an
+    # output contract of the parent UserFlow.
+    decision.map_input('approved', 'flow.approval.output["Decision"]')
     # Stricter demo rule: every proposed credit gets a real human task.
     aflow.sequence(START, prepare, policy, approval, decision, END)
     for field in Result.model_fields:

@@ -64,8 +64,8 @@ class OutageStore:
                     case_id TEXT PRIMARY KEY, quote_id TEXT UNIQUE NOT NULL, receipt TEXT NOT NULL);
             ''')
             db.executemany('INSERT OR IGNORE INTO cases VALUES (?,?,?,?,?,?,1)', [
-                ('CASE-NOUR-001', 'SVC-NOUR-001', 'نور أحمد', 'Nour Ahmed', 90000, 90000),
-                ('CASE-ROUTER-002', 'SVC-ROUTER-002', 'أحمد علي', 'Ahmed Ali', 90000, 90000),
+                ('CASE-NOUR-001', 'SVC-NOUR-001', 'Nour Ahmed', 'Nour Ahmed', 90000, 90000),
+                ('CASE-ROUTER-002', 'SVC-ROUTER-002', 'Ahmed Ali', 'Ahmed Ali', 90000, 90000),
             ])
 
     @contextmanager
@@ -90,14 +90,15 @@ class OutageStore:
             raise KeyError('case_not_found')
         return {
             'case_id': row['id'], 'service_id': row['service_id'],
-            'customer_ar': row['name_ar'], 'customer_en': row['name_en'],
+            # Retain the storage layout for existing ledgers; expose one name.
+            'customer_name': row['name_en'],
             'monthly_fee_egp': row['monthly_piasters']/100,
             'invoice_due_egp': row['invoice_piasters']/100, 'invoice_status': 'unpaid',
             'version': row['version'], 'synthetic': True,
             'history': [
-                {'channel': 'kiosk', 'event': 'Home internet activated / تفعيل الإنترنت المنزلي', 'ref': 'ORDER-KAI-2048'},
-                {'channel': 'website', 'event': 'Outage complaint / شكوى انقطاع الإنترنت', 'ref': case_id},
-                {'channel': 'employee', 'event': 'Investigation requested / طلب مراجعة الشكوى', 'ref': case_id},
+                {'channel': 'kiosk', 'event': 'Home internet activated', 'ref': 'ORDER-KAI-2048'},
+                {'channel': 'website', 'event': 'Internet outage reported', 'ref': case_id},
+                {'channel': 'employee', 'event': 'Case review requested', 'ref': case_id},
             ],
             'credit_receipt': json.loads(credit['receipt']) if credit else None,
         }

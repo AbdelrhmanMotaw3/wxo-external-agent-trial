@@ -16,7 +16,7 @@ class OutageAPITests(unittest.TestCase):
             'OUTAGE_WORKFLOW_TOKEN': 'privileged-test-workflow-only',
         }), patch('app.config.AGENT_AUTH_TOKEN', 'reader-test-token'):
             with TestClient(app) as client:
-                self.assertEqual(client.get('/health').json()['outage_demo_version'], '2026-11-18-v1')
+                self.assertEqual(client.get('/health').json()['outage_demo_version'], '2026-11-18-en-v2')
                 reader = {'Authorization': 'Bearer reader-test-token'}
                 writer = {'Authorization': 'Bearer privileged-test-workflow-only'}
                 self.assertEqual(client.get('/outage/cases/CASE-NOUR-001').status_code, 401)

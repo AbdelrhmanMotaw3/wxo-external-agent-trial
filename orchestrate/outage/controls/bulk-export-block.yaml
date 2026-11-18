@@ -11,7 +11,7 @@ control:
   config:
     regex_patterns:
       - 'EXPORT_ALL_CUSTOMER_DATA'
-      - 'تصدير كل بيانات العملاء'
+      - '(?i)export (all|every) customer (data|records|details)'
     strategy: block
   agent_names:
     - kai_outage_case_copilot_20261118

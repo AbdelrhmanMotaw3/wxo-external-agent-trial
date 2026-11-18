@@ -19,14 +19,14 @@ def _request(path, body=None):
 
 
 @tool(expected_credentials=[ExpectedCredentials(app_id='kai_outage_reader_20261118', type=ConnectionType.KEY_VALUE)],
-      description='Read the synthetic complaint, cross-channel history, current invoice and posted receipt. اقرأ الشكوى وسجل القنوات والفاتورة.')
+      description='Read the customer case, channel history, current invoice and posted service-credit receipt.')
 def kai_outage_get_case(case_id: str) -> dict:
     """Read case state. Args: case_id: Exact synthetic case identifier."""
     return _request('/outage/cases/'+quote(case_id, safe=''))
 
 
 @tool(expected_credentials=[ExpectedCredentials(app_id='kai_outage_reader_20261118', type=ConnectionType.KEY_VALUE)],
-      description='Prepare a source-backed synthetic credit quote. No invoice change and no approval. احسب عرض التعويض دون تنفيذ.')
+      description='Prepare an evidence-backed service-credit proposal for review. The invoice is changed only by the approved workflow.')
 def kai_outage_prepare_quote(case_id: str) -> dict:
     """Prepare authoritative quote. Args: case_id: Exact synthetic case identifier."""
     return _request('/outage/quotes', {'case_id':case_id})
