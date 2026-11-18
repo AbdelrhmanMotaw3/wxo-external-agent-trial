@@ -96,6 +96,17 @@ Verification after the English update must include an English-only ready KB, ref
 - Export run 306c0f1c-34d9-403b-9d6f-d945fde38735 was blocked; trace fb5ccd54e9bd6ac342e68307ddc3c0d0 records RegexPattern allow=false. Privacy trace 44857942386fa3f600f1b151b815b87a confirms input redaction before processing; comprehensive output redaction is unverified.
 - Local verification passed: 27 application/English tests and 4 deployment contract tests. Read-only reviews found no material source/helper findings.
 
-The external backend is still the previous deployed version until the English release script completes. These native English rehearsals used that existing backend and left its invoice at 810. The English deployment must verify health 2026-11-18-en-v2, canonical English case data, invoice 900 and no receipt before filming. Start a fresh chat after deployment; the rehearsal chat retains its completed receipt.
+### English deployment and filming baseline, 19 November
+
+The user-operated release completed on revision telecom-network-00008, with immutable image digest sha256:3f08ecc064a0bb960265de361bfd45625cc672d72e5a0ff4fb1b631791b792c0. The source commit is 15cd136a4b645e652dccc9785dbbec870741a43f; the deployment helper is pinned in commit 8533f7c000d26dfab30936db59dc19e04bc496ee. An independent public health read confirmed 2026-11-18-en-v2 and network_service.
+
+Post-deployment Draft thread e21b549e-4441-44a9-a681-d94e94720d35 exercised the natural opening, network and eligibility requests:
+
+- Case run aebea48e-5916-4fa3-a575-7d471a709757: raw tool output has customer_name Nour Ahmed, all-English history, invoice 900, version 1 and credit_receipt null; legacy bilingual name fields are absent. The employee response is English.
+- Network run 7382f83a-b036-4b91-83c6-7113934047fa: actual A2A collaboration returned English provider evidence, 72-hour duration and restored status.
+- Eligibility run 117fb96b-7f28-4faf-bfea-3408c5fe6fe2: quote preparation plus English policy retrieval returned 90 EGP, supervisor approval and projected invoice 810. This assessment leaves the invoice at 900.
+- Native input_required and working inventories were empty. No credit was posted after this deployment; approval/rejection evidence above comes from the earlier English rehearsal. No private bootstrap file was transferred.
+
+Start a fresh Draft Preview chat for filming; the old rehearsal chat retains its completed receipt. Use the natural conversation table above. The application and native API/MCP checks are verified; this deployment did not include a fresh visual UI recording or Live release.
 
 Pending optional work: Twilio transport and delivery, Agent Identity enablement, Live publishing and a separate-actor authorization test. An Egyptian-Arabic presentation adapter at the router may be added separately later; the present demo content and specialists are English-only.

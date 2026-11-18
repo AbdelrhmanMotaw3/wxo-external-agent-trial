@@ -28,9 +28,9 @@
 - [x] Preserve storage compatibility while exposing a canonical English customer name.
 - [x] Run affected backend tests and regenerate the compiled workflow.
 - [x] Import English native assets and verify current target and preserved credentials.
-- [ ] Review, publish reviewed source and deploy the English backend to the existing network application.
+- [x] Review, publish reviewed source and deploy the English backend to the existing network application.
 - [x] Verify English retrieval, external evidence, natural employee workflow requests and real rejection/approval.
-- [ ] Leave a clean filming baseline and report any remaining deployment or session blockers accurately.
+- [x] Leave a clean filming baseline and report any remaining deployment or session blockers accurately.
 
 ## Execution evidence
 
@@ -42,4 +42,8 @@
 - Native English approval instance cd53d6c8-c476-4905-ab25-34b9d34eb2b8 completed with applied/90/810 and receipt CR-0c5c2b3f993f4239.
 - English export trace fb5ccd54e9bd6ac342e68307ddc3c0d0 records RegexPattern allow=false. Privacy input trace 44857942386fa3f600f1b151b815b87a records redaction before processing.
 - Ruling: remove the sample-contact diagnostic tool from Customer Communications after a natural draft request selected it incorrectly. The copilot retains the diagnostic tool; privacy controls remain bound to all three agents. Retest without a supplied receipt requests the receipt and calls no tool (run 9c5f123e-3edc-4f6a-b690-9aed0d858832).
-- Read-only source and deployment-helper reviews found no material issues. The English backend deployment and fresh 900/no-receipt baseline remain pending.
+- Read-only source and deployment-helper reviews found no material issues.
+- User-operated English deployment returned ready on telecom-network-00008 with image digest sha256:3f08ecc064a0bb960265de361bfd45625cc672d72e5a0ff4fb1b631791b792c0. Independent public health check observed 2026-11-18-en-v2 and network_service.
+- Post-deployment native case run aebea48e-5916-4fa3-a575-7d471a709757 returned canonical customer_name Nour Ahmed, English history, invoice 900, version 1 and credit_receipt null in the raw case tool response. No legacy customer_ar/customer_en fields remained.
+- Post-deployment external run 7382f83a-b036-4b91-83c6-7113934047fa executed A2A and returned English evidence for the confirmed 72-hour restored outage. Eligibility run 117fb96b-7f28-4faf-bfea-3408c5fe6fe2 prepared the real 90 EGP quote and retrieved the English policy, preserving the 900 starting invoice.
+- Native input_required and working inventories were empty. No new settlement was run after deployment. The clean filming baseline is ready in Draft; prior English approval/rejection evidence remains recorded above. Live publishing and a new visual UI take are separate from these API/MCP checks.
