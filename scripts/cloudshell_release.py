@@ -2,7 +2,8 @@
 
 pip install --user ibm-code-engine-sdk==6.0.7
 python scripts/cloudshell_release.py
-Download runtime/cloud-bootstrap.json privately using Cloud Shell's file download.
+Existing Orchestrate connections and external bearer configuration are preserved.
+Private rollback/bootstrap records remain in Cloud Shell; no transfer is needed.
 """
 import json
 import os
@@ -19,7 +20,7 @@ from ibm_code_engine_sdk.code_engine_v2 import CodeEngineV2, AppPatch, EnvVarPro
 
 PROJECT = 'f47a9050-4217-48b2-b630-84b442ed5ea4'
 APP = 'telecom-network'
-SOURCE = '9c1040138cdec7d40c050ecf5a828a8b96a68282'
+SOURCE = '15cd136a4b645e652dccc9785dbbec870741a43f'
 IMAGE_REPOSITORY = 'private.ca.icr.io/wxo-training-698000u0qu/wxo-external-agent-trial'
 SECRET = 'kai-outage-workflow-20261118'
 
@@ -51,6 +52,19 @@ def revision_ready(app, revision, image):
     return bool(revision and app.get('status') == 'ready' and
                 app.get('image_reference') == image and
                 app.get('status_details', {}).get('latest_ready_revision') == revision)
+
+
+def assert_filming_ready(health, case):
+    if (health.get('outage_demo_version') != '2026-11-18-en-v2' or
+            health.get('agent_profile') != 'network_service'):
+        raise RuntimeError('Expected English network application code was not observed')
+    if (case.get('customer_name') != 'Nour Ahmed' or
+            'customer_ar' in case or 'customer_en' in case or
+            re.search(r'[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]',
+                      json.dumps(case, ensure_ascii=False))):
+        raise RuntimeError('Expected English-only customer case was not observed')
+    if case.get('invoice_due_egp') != 900 or case.get('credit_receipt') is not None:
+        raise RuntimeError('Unexpected synthetic starting invoice or receipt; investigate before filming')
 
 
 def main():
@@ -86,7 +100,7 @@ def main():
     if not reader or reader == 'change-me-trial-token':
         raise RuntimeError('Configured inbound credential could not be safely resolved; no deployment')
 
-    build_name = 'outage-9c10401-'+str(int(time.time()))+'-'+secrets.token_hex(3)
+    build_name = 'outage-'+SOURCE[:7]+'-'+str(int(time.time()))+'-'+secrets.token_hex(3)
     tagged_image = IMAGE_REPOSITORY+':'+build_name
     run = ce.create_build_run(PROJECT, name=build_name, output_image=tagged_image,
         output_secret='wxo-registry-access', source_type='git',
@@ -155,13 +169,10 @@ def main():
         base = 'https://'+base
     with urlopen(base+'/health', timeout=45) as response:
         health = json.load(response)
-    if health.get('outage_demo_version') != '2026-11-18-v1':
-        raise RuntimeError('Expected new application code was not observed')
     with urlopen(Request(base+'/outage/cases/CASE-NOUR-001',
                         headers={'Authorization':'Bearer '+reader}), timeout=45) as response:
         case = json.load(response)
-    if case.get('invoice_due_egp') != 900:
-        raise RuntimeError('Unexpected synthetic starting invoice; investigate before filming')
+    assert_filming_ready(health, case)
     private_json(Path('runtime/cloud-bootstrap.json'), {
         'project_id':PROJECT, 'app':APP, 'source_commit':SOURCE,
         'base_url':base, 'reader_token':reader, 'workflow_token':writer})

@@ -3,6 +3,19 @@ from scripts import cloudshell_release as release
 
 
 class ReleaseContractTests(unittest.TestCase):
+    def test_filming_readiness_requires_english_fresh_case(self):
+        health = {'outage_demo_version':'2026-11-18-en-v2', 'agent_profile':'network_service'}
+        case = {'customer_name':'Nour Ahmed', 'invoice_due_egp':900, 'credit_receipt':None,
+                'history':[{'event':'Internet outage reported'}]}
+        release.assert_filming_ready(health, case)
+        for changes in ({'customer_ar':'legacy'}, {'invoice_due_egp':810},
+                        {'credit_receipt':{'status':'applied'}},
+                        {'history':[{'event':'\u062a\u062c\u0631\u0628\u0629'}]}):
+            with self.subTest(changes=changes), self.assertRaises(RuntimeError):
+                release.assert_filming_ready(health, {**case, **changes})
+        with self.assertRaises(RuntimeError):
+            release.assert_filming_ready({**health, 'outage_demo_version':'2026-11-18-v1'}, case)
+
     def test_deployment_uses_digest_and_verified_source(self):
         run = {'status_details':{'output_digest':'sha256:'+'a'*64,'git_commit_sha':release.SOURCE}}
         self.assertEqual(release.deployment_image(run), release.IMAGE_REPOSITORY+'@sha256:'+'a'*64)
