@@ -1,0 +1,19 @@
+spec_version: v1
+kind: control
+control:
+  artifact_name: RegexPattern
+  name: kai_outage_bulk_export_block_20261118
+  display_name: KAI | Bulk export restriction
+  description: Block explicit bulk customer export requests on the case-scoped demo agents. This is a deterministic pattern control, not semantic DLP.
+  hooks:
+    - agent_pre_invoke
+  priority: 50
+  config:
+    regex_patterns:
+      - 'EXPORT_ALL_CUSTOMER_DATA'
+      - 'تصدير كل بيانات العملاء'
+    strategy: block
+  agent_names:
+    - kai_outage_case_copilot_20261118
+    - kai_outage_communications_20261118
+    - kai_outage_policy_agent_20261118
