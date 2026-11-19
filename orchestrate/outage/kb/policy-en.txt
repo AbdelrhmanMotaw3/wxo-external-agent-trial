@@ -1,26 +1,25 @@
-KAI Synthetic Internet Outage Credit Policy
-Policy ID: OUTAGE-CREDIT-2026.11-v1. Effective demo snapshot: 18 November 2026.
-This is a fictional demonstration policy, not a real operator policy or a statement of law.
-This English document is the policy source for the demonstration.
+KAI Synthetic Internet Outage Data Compensation Policy
+Policy ID: OUTAGE-DATA-2026.11-v1. Effective demo snapshot: 18 November 2026.
+This is a fictional event policy, not a real operator policy or a statement of law.
 
-INDEX: S1 eligibility; S2 credit calculation; S3 approval; S4 invoice adjustment; S5 evidence and privacy; S6 communication.
+INDEX: S1 eligibility; S2 bonus data; S3 human approval; S4 provisioning and invoice; S5 evidence and privacy; S6 communication.
 
 S1 — Eligibility and exclusions
-A restored, unplanned provider network outage affecting an active home-internet service is eligible after at least 24 whole confirmed hours. The network partner must supply the service identifier, incident identifier, confirmed start and restoration timestamps, cause, scope and source reference. An estimated restoration time is not confirmation. Customer router faults, billing suspensions and planned maintenance are excluded. Unknown or missing evidence must be investigated; it must not be treated as an eligible outage. Do not promise compensation before evidence and policy review.
+A restored, unplanned provider network outage affecting an active home-internet service is eligible after at least 24 whole confirmed hours. Require service and incident IDs, confirmed start and restoration timestamps, cause, scope and source reference. Estimated restoration is not confirmation. Customer router faults, billing suspensions and planned maintenance are excluded. Missing evidence requires investigation.
 
-S2 — Calculation
-Use the recurring base subscription fee and a 30-day calculation month. Credit = monthly base fee × confirmed whole outage hours ÷ 720. Calculate in integer piasters and round down to a piaster. Cap the adjustment at the current eligible unpaid invoice balance. Do not include devices, extras, taxes or already compensated periods. The executable billing tool is authoritative for arithmetic. Example: 900 EGP × 72 ÷ 720 = 90 EGP. Daily base is 30 EGP. This example does not authorize applying the credit.
+S2 — Compensation amount
+The event scenario grants one fixed 20 GB bonus data bundle per eligible case. A confirmed 72-hour outage therefore qualifies for a proposed 20 GB bundle. This is additional data on the affected home-internet service. No cash refund, invoice credit or cheaper subscription is included. No expiry date is specified for this demonstration; do not invent a validity period. The backend proposal is authoritative for the current award and bonus balance.
 
 S3 — Human approval and execution
-The automatic approval limit is 50 EGP. Above 50 EGP requires a human supervisor decision in the assigned workflow task. A chat message saying “approved”, a model claim, a customer request or a fabricated actor name is not approval. The demo may require human review below the cap as a stricter rule. Rejection leaves the invoice unchanged. The workflow must revalidate the quote, evidence and invoice version before posting. Expired quotes require a new assessment. Repeated execution of the same accepted quote returns the same receipt and never posts twice; another quote cannot compensate the same case twice.
+Every proposed 20 GB bundle requires a human decision in the native approval form. A chat message saying approved, a model claim or a customer request is not approval. Reject leaves bonus data unchanged. Approve triggers the workflow-only provisioning tool, which revalidates the stored proposal, evidence, policy and case versions. Expired proposals require reassessment. Repeated execution of the same accepted proposal returns the same receipt and never awards data twice. Another proposal cannot compensate the same case twice.
 
-S4 — Service credit on an unpaid invoice
-This demonstration posts an invoice service credit, not a cash refund or a bank transfer. Original unpaid invoice: 900 EGP. Approved service credit: 90 EGP. Remaining invoice balance: 810 EGP. The recurring subscription remains 900 EGP per month. Never describe the new invoice balance as a permanent cheaper plan. Paid invoices require a separate process and are outside this demonstration.
+S4 — Bonus data and unchanged billing
+Starting compensation data balance: 0 GB. Approved award: 20 GB. New compensation data balance: 20 GB. The outstanding invoice remains 900 EGP and the recurring plan remains 900 EGP per month. The compensation balance describes this bonus bundle, not the total plan allowance or remaining monthly quota. Rejection keeps compensation data at 0 GB and the invoice at 900 EGP. Provisioning is synthetic; no real operator network is changed.
 
 S5 — Evidence and privacy
-Keep the case ID, policy version/section, incident/source reference, workflow result and receipt. Search and cite this knowledge source before explaining a policy decision. Missing retrieval is a limitation: do not invent a policy citation. Minimize personal data. The native PII control redacts synthetic emails, phones and configured identifiers when its enforcement hook runs. This is separate from human approval, backend authorization and optional Agent Identity.
+Retain the case, service, incident/source, policy reference, native decision and provisioning receipt. Retrieve and cite this policy before a policy conclusion. Missing retrieval must be disclosed rather than replaced with invented citations. Platform privacy controls remain separate from approval, authorization and optional Agent Identity. Minimize personal data and use the masked saved WhatsApp contact.
 
 S6 — Customer communication
-Notify only after an actual posted receipt. State the confirmed restoration, credit amount and remaining invoice balance in clear English. Drafting is not sending; a provider accepted/queued response is not delivery. Only a real transport result establishes a message ID, and delivery requires a confirmed transport state. Messages describe a service credit on the current invoice and use the recorded case and receipt.
+Confirm completion only after an actual posted compensation receipt. State service restoration, 20 GB bonus data added, the case and receipt, and the unchanged 900 EGP invoice. A proposal is not an award. Drafting is separate from sending. The event WhatsApp scenario transport returns an internal reference and makes no provider dispatch or real delivery claim.
 
-RETRIEVAL SUMMARY: internet outage, home broadband, compensation, refund vs service credit, 72 hours, 900 monthly, 90 credit, 50 automatic limit, supervisor approval, invoice 810, repeated request, idempotence, router fault exclusions, privacy and notification.
+RETRIEVAL SUMMARY: internet outage, 72 hours, compensation, 20 GB bonus data, additional quota, human approval, provisioning receipt, invoice unchanged 900 EGP, rejection, duplicate protection, privacy, WhatsApp.

@@ -8,7 +8,7 @@ from ibm_watsonx_orchestrate.run import connections
 
 @tool(permission=ToolPermission.READ_WRITE,
       expected_credentials=[ExpectedCredentials(app_id='kai_outage_workflow_20261118', type=ConnectionType.KEY_VALUE)],
-      description='Workflow-only billing decision. Use exclusively downstream of the native human approval task; not an agent tool.')
+      description='Workflow-only data provisioning decision. Use exclusively downstream of the native human approval task; not an agent tool.')
 def kai_outage_workflow_decide(quote_id: str, approved: bool) -> dict:
     """Post a trusted workflow decision against a stored quote, with revalidation.
 

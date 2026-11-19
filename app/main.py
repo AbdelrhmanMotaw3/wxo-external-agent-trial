@@ -110,8 +110,10 @@ async def health() -> dict[str, Any]:
         "service": config.SERVICE_NAME,
         "model": config.OPENROUTER_MODEL,
         "public_url": config.PUBLIC_URL,
-        "outage_demo_version": "2026-11-19-en-v3",
+        "outage_demo_version": "2026-11-19-data-v4",
         "rehearsal_sessions": True,
+        "compensation_type": "bonus_data",
+        "compensation_gb": 20,
     }
     if config.AGENT_PROFILE != "trial":
         health_data["agent_profile"] = config.AGENT_PROFILE

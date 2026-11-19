@@ -25,12 +25,12 @@ class OutageTests(unittest.TestCase):
         self.assertEqual(evidence['status'], 'restored')
         self.assertEqual(evidence['cause'], 'provider_network_fault')
         self.assertTrue(evidence['source_ref'])
-        self.assertNotIn('credit_egp', evidence)
+        self.assertNotIn('bonus_data_gb', evidence)
 
     def test_quote_is_not_a_credit(self):
         quote = self.store.quote('CASE-NOUR-001')
-        self.assertEqual(quote['credit_egp'], 90)
-        self.assertEqual(quote['invoice_after_egp'], 810)
+        self.assertEqual(quote['bonus_data_gb'], 20)
+        self.assertEqual(quote['invoice_after_egp'], 900)
         self.assertTrue(quote['requires_approval'])
         self.assertEqual(self.store.case('CASE-NOUR-001')['invoice_due_egp'], 900)
 
@@ -48,7 +48,7 @@ class OutageTests(unittest.TestCase):
             receipts = list(pool.map(lambda _: self.store.decide(quote['quote_id'], True), range(4)))
         self.assertEqual(len({r['receipt_id'] for r in receipts}), 1)
         fresh = outage.OutageStore(self.path)
-        self.assertEqual(fresh.case('CASE-NOUR-001')['invoice_due_egp'], 810)
+        self.assertEqual(fresh.case('CASE-NOUR-001')['invoice_due_egp'], 900)
         self.assertEqual(fresh.case('CASE-NOUR-001')['monthly_fee_egp'], 900)
         self.assertEqual(fresh.decide(quote['quote_id'], True)['receipt_id'], receipts[0]['receipt_id'])
 
@@ -64,7 +64,7 @@ class OutageTests(unittest.TestCase):
         b = self.store.quote('CASE-NOUR-001')
         self.store.decide(a['quote_id'], True)
         rejection = self.store.decide(b['quote_id'], False)
-        self.assertEqual(rejection['invoice_after_egp'], 810)
+        self.assertEqual(rejection['invoice_after_egp'], 900)
         self.assertEqual(rejection['invoice_after_egp'], self.store.case('CASE-NOUR-001')['invoice_due_egp'])
 
     def test_unknown_and_non_provider_fault_are_not_eligible(self):

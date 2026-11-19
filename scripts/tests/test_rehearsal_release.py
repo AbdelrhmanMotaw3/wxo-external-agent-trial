@@ -25,9 +25,10 @@ class RehearsalReleaseTests(unittest.TestCase):
 
     def test_health_requires_session_aware_version(self):
         health = {'outage_demo_version': release.VERSION, 'agent_profile': 'network_service',
-                  'rehearsal_sessions': True}
+                  'rehearsal_sessions': True, 'compensation_type':'bonus_data','compensation_gb':20}
         release.assert_health(health)
         for changes in ({'rehearsal_sessions': False}, {'outage_demo_version': '2026-11-18-en-v2'},
-                        {'agent_profile': 'customer_account'}):
+                        {'agent_profile': 'customer_account'},{'compensation_gb':90},
+                        {'compensation_type':'invoice_credit'}):
             with self.subTest(changes=changes), self.assertRaises(RuntimeError):
                 release.assert_health({**health, **changes})

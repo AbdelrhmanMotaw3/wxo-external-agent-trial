@@ -15,7 +15,7 @@ APP = 'telecom-network'
 REPOSITORY = 'https://github.com/AbdelrhmanMotaw3/wxo-external-agent-trial'
 IMAGE_REPOSITORY = 'private.ca.icr.io/wxo-training-698000u0qu/wxo-external-agent-trial'
 ENDPOINT = 'https://telecom-network.2gqohspjx3cv.ca-tor.codeengine.appdomain.cloud'
-VERSION = '2026-11-19-en-v3'
+VERSION = '2026-11-19-data-v4'
 
 
 def report(phase, **safe):
@@ -51,7 +51,9 @@ def revision_ready(app, revision, image):
 def assert_health(health):
     if (health.get('outage_demo_version') != VERSION
             or health.get('agent_profile') != 'network_service'
-            or health.get('rehearsal_sessions') is not True):
+            or health.get('rehearsal_sessions') is not True
+            or health.get('compensation_type') != 'bonus_data'
+            or health.get('compensation_gb') != 20):
         raise RuntimeError('Expected conversation-aware network application was not observed')
 
 

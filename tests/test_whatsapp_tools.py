@@ -17,10 +17,10 @@ spec.loader.exec_module(wa)
 def posted_case():
     return {
         'case_id': 'CASE-NOUR-001', 'service_id': 'SVC-NOUR-001', 'customer_name': 'Nour Ahmed',
-        'synthetic': True, 'monthly_fee_egp': 900, 'invoice_due_egp': 810,
-        'credit_receipt': {'case_id': 'CASE-NOUR-001', 'receipt_id': 'CR-TEST-001',
+        'synthetic': True, 'monthly_fee_egp': 900, 'invoice_due_egp': 900, 'bonus_data_balance_gb':20,
+        'compensation_receipt': {'case_id': 'CASE-NOUR-001', 'receipt_id': 'CR-TEST-001',
             'status': 'applied', 'human_decision_recorded': True,
-            'credit_egp': 90, 'invoice_before_egp': 900, 'invoice_after_egp': 810},
+            'bonus_data_gb': 20, 'bonus_balance_before_gb':0, 'bonus_balance_after_gb':20, 'invoice_before_egp': 900, 'invoice_after_egp': 900},
     }
 
 
@@ -48,27 +48,27 @@ class WhatsAppToolTests(unittest.TestCase):
     def test_explicit_send_can_prepare_the_canonical_message_inline(self):
         result = wa.dispatch_response(posted_case(), '', 'NOUR_WHATSAPP')
         self.assertEqual(result['structuredContent']['status'], 'sent')
-        self.assertIn('90 EGP', result['structuredContent']['message'])
+        self.assertIn('20 GB', result['structuredContent']['message'])
 
     def test_inline_send_reference_matches_preview_and_changes_with_receipt(self):
         case = posted_case()
         inline = wa.dispatch_response(case, '', 'NOUR_WHATSAPP')['structuredContent']
         staged = wa.dispatch_response(case, wa.prepare_payload(case)['draft_id'], 'NOUR_WHATSAPP')['structuredContent']
         self.assertEqual(inline['message_id'], staged['message_id'])
-        case['credit_receipt']['receipt_id'] = 'CR-NEXT-REHEARSAL'
+        case['compensation_receipt']['receipt_id'] = 'CR-NEXT-REHEARSAL'
         other = wa.dispatch_response(case, '', 'NOUR_WHATSAPP')['structuredContent']
         self.assertNotEqual(inline['message_id'], other['message_id'])
 
     def test_notification_rejects_a_receipt_from_another_rehearsal(self):
         case = posted_case()
         case['rehearsal_id'] = '11111111-1111-4111-8111-111111111111'
-        case['credit_receipt']['rehearsal_id'] = '22222222-2222-4222-8222-222222222222'
+        case['compensation_receipt']['rehearsal_id'] = '22222222-2222-4222-8222-222222222222'
         with self.assertRaisesRegex(ValueError, 'another conversation'):
             wa.prepare_payload(case)
 
     def test_unsettled_case_cannot_prepare_or_announce_sent(self):
         case = posted_case()
-        case['credit_receipt'] = None
+        case['compensation_receipt'] = None
         with self.assertRaisesRegex(ValueError, 'posted receipt'):
             wa.prepare_payload(case)
 
@@ -76,8 +76,8 @@ class WhatsAppToolTests(unittest.TestCase):
         result = wa.preview_response(posted_case())
         data = result['structuredContent']
         self.assertEqual(data['status'], 'draft')
-        self.assertIn('90 EGP', data['message'])
-        self.assertIn('810 EGP', data['message'])
+        self.assertIn('20 GB', data['message'])
+        self.assertIn('900 EGP', data['message'])
         self.assertIn('CR-TEST-001', data['message'])
         self.assertEqual(data['provider_message_id'], None)
         self.assertIn('WhatsApp message ready', result['content'][0]['text'])
@@ -89,7 +89,7 @@ class WhatsAppToolTests(unittest.TestCase):
     def test_dispatch_requires_the_exact_current_draft(self):
         case = posted_case()
         draft = wa.prepare_payload(case)
-        case['credit_receipt']['receipt_id'] = 'CR-NEW-002'
+        case['compensation_receipt']['receipt_id'] = 'CR-NEW-002'
         with self.assertRaisesRegex(ValueError, 'Prepare the message again'):
             wa.dispatch_response(case, draft['draft_id'], 'NOUR_WHATSAPP')
 
@@ -132,9 +132,9 @@ class WhatsAppToolTests(unittest.TestCase):
                 wa.dispatch_response(posted_case(), wa.prepare_payload(posted_case())['draft_id'], recipient)
 
     def test_stale_balance_or_forged_case_receipt_cannot_be_sent(self):
-        for edit in (lambda c: c.update(invoice_due_egp=900),
-                     lambda c: c['credit_receipt'].update(case_id='OTHER'),
-                     lambda c: c['credit_receipt'].update(human_decision_recorded=False),
+        for edit in (lambda c: c.update(invoice_due_egp=810),
+                     lambda c: c['compensation_receipt'].update(case_id='OTHER'),
+                     lambda c: c['compensation_receipt'].update(human_decision_recorded=False),
                      lambda c: c.update(synthetic=False)):
             case = copy.deepcopy(posted_case())
             edit(case)

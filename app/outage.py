@@ -11,7 +11,8 @@ from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
-POLICY = 'OUTAGE-CREDIT-2026.11-v1'
+POLICY = 'OUTAGE-DATA-2026.11-v1'
+BONUS_DATA_GB = 20
 SNAPSHOT = '2026-11-18T12:00:00Z'
 EVIDENCE = {
     'SVC-NOUR-001': {
@@ -46,7 +47,7 @@ class OutageStore:
     """SQLite transactions survive process restart when the same disk is retained.
 
     Code Engine's default local disk is ephemeral: use a persistent backend for
-    continuity across revisions/scale-to-zero. Demo-only money; no payment rail.
+    continuity across revisions/scale-to-zero. Synthetic bonus data; no provisioning rail.
     """
     def __init__(self, path: str | Path, rehearsal_id: str | None = None):
         if rehearsal_id is not None:
@@ -63,10 +64,10 @@ class OutageStore:
                     id TEXT PRIMARY KEY, service_id TEXT NOT NULL, name_ar TEXT NOT NULL,
                     name_en TEXT NOT NULL, monthly_piasters INTEGER NOT NULL,
                     invoice_piasters INTEGER NOT NULL, version INTEGER NOT NULL DEFAULT 1);
-                CREATE TABLE IF NOT EXISTS quotes (
+                CREATE TABLE IF NOT EXISTS data_quotes (
                     id TEXT PRIMARY KEY, case_id TEXT NOT NULL, payload TEXT NOT NULL,
                     state TEXT NOT NULL DEFAULT 'pending', receipt TEXT);
-                CREATE TABLE IF NOT EXISTS credits (
+                CREATE TABLE IF NOT EXISTS data_awards (
                     case_id TEXT PRIMARY KEY, quote_id TEXT UNIQUE NOT NULL, receipt TEXT NOT NULL);
             ''')
             db.executemany('INSERT OR IGNORE INTO cases VALUES (?,?,?,?,?,?,1)', [
@@ -76,7 +77,9 @@ class OutageStore:
 
     def _case_key(self, case_id: str) -> str:
         # Private storage namespace only; public customer/case labels stay stable.
-        return f'{self.rehearsal_id}:{case_id}' if self.rehearsal_id else case_id
+        scope = f'{self.rehearsal_id}:{case_id}' if self.rehearsal_id else case_id
+        # Keep the new data remedy separate from historical financial rehearsals.
+        return f'data-v1:{scope}'
 
     @contextmanager
     def _db(self):
@@ -96,7 +99,7 @@ class OutageStore:
         key = self._case_key(case_id)
         with self._db() as db:
             row = db.execute('SELECT * FROM cases WHERE id=?', (key,)).fetchone()
-            credit = db.execute('SELECT receipt FROM credits WHERE case_id=?', (key,)).fetchone()
+            award = db.execute('SELECT receipt FROM data_awards WHERE case_id=?', (key,)).fetchone()
         if row is None:
             raise KeyError('case_not_found')
         return {
@@ -112,42 +115,40 @@ class OutageStore:
                 {'channel': 'website', 'event': 'Internet outage reported', 'ref': case_id},
                 {'channel': 'employee', 'event': 'Case review requested', 'ref': case_id},
             ],
-            'credit_receipt': json.loads(credit['receipt']) if credit else None,
+            'bonus_data_balance_gb': json.loads(award['receipt'])['bonus_balance_after_gb'] if award else 0,
+            'compensation_receipt': json.loads(award['receipt']) if award else None,
         }
 
     @staticmethod
     def _assessment(case: dict) -> dict:
         evidence = partner_evidence(case['service_id'])
         if not evidence or evidence['status'] != 'restored' or evidence['cause'] != 'provider_network_fault' or evidence['planned']:
-            raise ValueError('not_eligible_for_outage_credit')
+            raise ValueError('not_eligible_for_outage_compensation')
         hours = evidence['confirmed_hours']
-        # Whole confirmed hours only; currency in integer piasters.
+        # The fictional event policy grants a fixed one-time data bundle.
         if hours < 24 or hours != int(hours):
             raise ValueError('unsupported_or_insufficient_duration')
-        monthly = round(case['monthly_fee_egp']*100)
-        credit = min(monthly * int(hours) // (30*24), round(case['invoice_due_egp']*100))
-        if credit <= 0:
-            raise ValueError('no_outstanding_eligible_amount')
         return {'policy_version': POLICY, 'policy_sections': ['S1', 'S2', 'S3', 'S4'],
-                'confirmed_hours': hours, 'credit_egp': credit/100,
+                'confirmed_hours': hours, 'bonus_data_gb': BONUS_DATA_GB,
+                'bonus_balance_before_gb': case['bonus_data_balance_gb'],
+                'bonus_balance_after_gb': case['bonus_data_balance_gb'] + BONUS_DATA_GB,
                 'invoice_before_egp': case['invoice_due_egp'],
-                'invoice_after_egp': case['invoice_due_egp']-credit/100,
-                'requires_approval': credit > 5000,
-                'automatic_limit_egp': 50, 'evidence': evidence,
+                'invoice_after_egp': case['invoice_due_egp'],
+                'requires_approval': True, 'evidence': evidence,
                 'invoice_version': case['version'], 'case_id': case['case_id'],
-                'synthetic': True, 'adjustment_type': 'service_credit_not_cash_refund'}
+                'synthetic': True, 'adjustment_type': 'bonus_data_bundle'}
 
     def quote(self, case_id: str, now: float | None = None) -> dict:
         case = self.case(case_id)
-        if case['credit_receipt']:
-            raise ValueError('credit_already_applied')
+        if case['compensation_receipt']:
+            raise ValueError('compensation_already_applied')
         payload = self._assessment(case)
         payload.update(quote_id='Q-'+uuid.uuid4().hex[:16], expires_at=(time.time() if now is None else now)+1800)
         if self.rehearsal_id:
             payload['rehearsal_id'] = self.rehearsal_id
         payload['evidence_digest'] = hashlib.sha256(json.dumps(payload['evidence'], sort_keys=True).encode()).hexdigest()
         with self._db() as db:
-            db.execute('INSERT INTO quotes(id,case_id,payload) VALUES (?,?,?)',
+            db.execute('INSERT INTO data_quotes(id,case_id,payload) VALUES (?,?,?)',
                        (payload['quote_id'], self._case_key(case_id), json.dumps(payload, ensure_ascii=False)))
         return payload
 
@@ -156,7 +157,7 @@ class OutageStore:
         if type(approved) is not bool:
             raise ValueError('decision_must_be_boolean')
         with self._db() as db:
-            quote = db.execute('SELECT * FROM quotes WHERE id=?', (quote_id,)).fetchone()
+            quote = db.execute('SELECT * FROM data_quotes WHERE id=?', (quote_id,)).fetchone()
             if not quote:
                 raise KeyError('quote_not_found')
             payload = json.loads(quote['payload'])
@@ -164,7 +165,7 @@ class OutageStore:
                 raise ValueError('rehearsal_mismatch')
             if quote['state'] == 'applied':
                 if not approved:
-                    raise ValueError('credit_already_applied')
+                    raise ValueError('compensation_already_applied')
                 return json.loads(quote['receipt'])
             if quote['state'] != 'pending':
                 raise ValueError('quote_is_closed')
@@ -173,26 +174,33 @@ class OutageStore:
             case = db.execute('SELECT * FROM cases WHERE id=?', (quote['case_id'],)).fetchone()
             if not approved:
                 result = {'status': 'rejected', 'quote_id': quote_id, 'case_id': payload['case_id'],
-                          'synthetic': True, 'receipt_id': '', 'credit_egp': 0,
+                          'synthetic': True, 'receipt_id': '', 'bonus_data_gb': 0,
+                          'bonus_balance_after_gb': 0,
+                          'summary': 'Compensation rejected. No bonus data added. Invoice unchanged.',
                           'invoice_after_egp': case['invoice_piasters']/100}
                 if payload.get('rehearsal_id'):
                     result['rehearsal_id'] = payload['rehearsal_id']
-                db.execute("UPDATE quotes SET state='rejected' WHERE id=?", (quote_id,))
+                existing = db.execute('SELECT receipt FROM data_awards WHERE case_id=?', (quote['case_id'],)).fetchone()
+                if existing:
+                    result['bonus_balance_after_gb'] = json.loads(existing['receipt'])['bonus_balance_after_gb']
+                db.execute("UPDATE data_quotes SET state='rejected' WHERE id=?", (quote_id,))
                 return result
             evidence = partner_evidence(case['service_id'])
             digest = hashlib.sha256(json.dumps(evidence, sort_keys=True).encode()).hexdigest()
             if case['version'] != payload['invoice_version'] or digest != payload['evidence_digest'] or payload['policy_version'] != POLICY:
                 raise ValueError('stale_quote_reassess_required')
-            if db.execute('SELECT 1 FROM credits WHERE case_id=?', (quote['case_id'],)).fetchone():
-                raise ValueError('credit_already_applied')
-            result = {k: payload[k] for k in ('case_id', 'quote_id', 'credit_egp', 'invoice_before_egp', 'invoice_after_egp', 'policy_version')}
-            result.update(status='applied', receipt_id='CR-'+uuid.uuid4().hex[:16], synthetic=True,
+            if db.execute('SELECT 1 FROM data_awards WHERE case_id=?', (quote['case_id'],)).fetchone():
+                raise ValueError('compensation_already_applied')
+            result = {k: payload[k] for k in ('case_id', 'quote_id', 'bonus_data_gb',
+                'bonus_balance_before_gb', 'bonus_balance_after_gb', 'invoice_before_egp', 'invoice_after_egp', 'policy_version')}
+            result.update(status='applied', receipt_id='DATA-'+uuid.uuid4().hex[:16], synthetic=True,
+                          adjustment_type='bonus_data_bundle',
+                          summary='20 GB bonus data added successfully. The invoice remains unchanged at 900 EGP.',
                           human_decision_recorded=True, decision_channel='native_workflow')
             if payload.get('rehearsal_id'):
                 result['rehearsal_id'] = payload['rehearsal_id']
             encoded = json.dumps(result)
-            db.execute('INSERT INTO credits VALUES (?,?,?)', (quote['case_id'], quote_id, encoded))
-            db.execute("UPDATE quotes SET state='applied',receipt=? WHERE id=?", (encoded, quote_id))
-            db.execute('UPDATE cases SET invoice_piasters=?,version=version+1 WHERE id=?',
-                       (round(payload['invoice_after_egp']*100), quote['case_id']))
+            db.execute('INSERT INTO data_awards VALUES (?,?,?)', (quote['case_id'], quote_id, encoded))
+            db.execute("UPDATE data_quotes SET state='applied',receipt=? WHERE id=?", (encoded, quote_id))
+            db.execute('UPDATE cases SET version=version+1 WHERE id=?', (quote['case_id'],))
             return result

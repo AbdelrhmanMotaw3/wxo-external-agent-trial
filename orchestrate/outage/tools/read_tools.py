@@ -34,7 +34,7 @@ def _request(path, body=None, rehearsal_id=None):
 
 
 @tool(expected_credentials=[ExpectedCredentials(app_id='kai_outage_reader_20261118', type=ConnectionType.KEY_VALUE)],
-      description='Read the customer case, channel history, current invoice and posted service-credit receipt.')
+      description='Read the customer case, channel history, current invoice and posted data-compensation receipt.')
 def kai_outage_get_case(case_id: str, context: AgentRun) -> dict:
     """Read the case in the current conversation's independent rehearsal.
 
@@ -46,7 +46,7 @@ def kai_outage_get_case(case_id: str, context: AgentRun) -> dict:
 
 
 @tool(expected_credentials=[ExpectedCredentials(app_id='kai_outage_reader_20261118', type=ConnectionType.KEY_VALUE)],
-      description='Prepare an evidence-backed service-credit proposal for review. The invoice is changed only by the approved workflow.')
+      description='Prepare a fixed 20 GB bonus-data proposal for human review. Preparation grants no data and the invoice remains unchanged.')
 def kai_outage_prepare_quote(case_id: str, context: AgentRun) -> dict:
     """Prepare a quote bound to the current conversation's rehearsal.
 

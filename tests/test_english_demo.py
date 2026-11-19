@@ -19,7 +19,7 @@ class EnglishDemoTests(unittest.TestCase):
         self.assertNotIn('customer_ar', case)
         self.assertNotIn('customer_en', case)
         self.assertEqual(case['invoice_due_egp'], 900)
-        self.assertIsNone(case['credit_receipt'])
+        self.assertIsNone(case['compensation_receipt'])
         self.assertIsNone(ARABIC.search(json.dumps(case, ensure_ascii=False)))
 
     def test_active_demo_sources_contain_no_arabic_text(self):

@@ -57,7 +57,7 @@ def _format_money(value: Decimal) -> str:
 
 
 def prepare_payload(case: dict) -> dict:
-    receipt = case.get('credit_receipt') or {}
+    receipt = case.get('compensation_receipt') or {}
     if case.get('case_id') != 'CASE-NOUR-001' or case.get('service_id') != 'SVC-NOUR-001' or case.get('synthetic') is not True:
         raise ValueError('Only the configured synthetic customer case is supported.')
     if not (receipt.get('status') == 'applied' and receipt.get('receipt_id')
@@ -66,17 +66,20 @@ def prepare_payload(case: dict) -> dict:
         raise ValueError('A verified posted receipt is required before preparing or sending the update.')
     if case.get('rehearsal_id') and receipt.get('rehearsal_id') != case['rehearsal_id']:
         raise ValueError('The receipt belongs to another conversation rehearsal.')
-    credit = _money(receipt.get('credit_egp'))
+    bonus = _money(receipt.get('bonus_data_gb'))
+    bonus_before = _money(receipt.get('bonus_balance_before_gb'))
+    bonus_after = _money(receipt.get('bonus_balance_after_gb'))
     before = _money(receipt.get('invoice_before_egp'))
     due = _money(receipt.get('invoice_after_egp'))
     monthly = _money(case.get('monthly_fee_egp'))
-    if credit <= 0 or monthly <= 0 or due != _money(case.get('invoice_due_egp')) or before - credit != due:
-        raise ValueError('The posted receipt and current invoice do not match. Refresh the case.')
+    if (bonus <= 0 or monthly <= 0 or due != _money(case.get('invoice_due_egp')) or before != due
+            or bonus_before + bonus != bonus_after or bonus_after != _money(case.get('bonus_data_balance_gb'))):
+        raise ValueError('The posted receipt and current bonus data or invoice do not match. Refresh the case.')
     message = (
         f"Hi Nour, your home internet service has been restored. We have applied a one-time "
-        f"service credit of {_format_money(credit)} EGP to case {case['case_id']}. "
-        f"Your remaining invoice balance is {_format_money(due)} EGP. "
-        f"Your monthly plan remains {_format_money(monthly)} EGP. "
+        f"bonus data bundle of {_format_money(bonus)} GB to your home internet service for case {case['case_id']}. "
+        f"Your compensation data balance is now {_format_money(bonus_after)} GB. "
+        f"Your invoice remains {_format_money(due)} EGP and your monthly plan remains {_format_money(monthly)} EGP. "
         f"Receipt: {receipt['receipt_id']}. Thank you for your patience. — Aven Customer Care"
     )
     fingerprint = hashlib.sha256(json.dumps([case['case_id'], receipt['receipt_id'], message],
@@ -84,7 +87,7 @@ def prepare_payload(case: dict) -> dict:
     return {
         'status': 'draft', 'case_id': case['case_id'], 'service_id': case['service_id'],
         'customer_name': case['customer_name'], 'receipt_id': receipt['receipt_id'],
-        'credit_egp': float(credit), 'invoice_after_egp': float(due),
+        'bonus_data_gb': float(bonus), 'bonus_data_balance_gb': float(bonus_after), 'invoice_after_egp': float(due),
         'monthly_fee_egp': float(monthly), 'draft_id': 'WA-DRAFT-' + fingerprint,
         'message': message, 'channel': 'WhatsApp', 'simulated': True,
         'transport': 'scenario', 'provider_dispatch_performed': False,
@@ -128,7 +131,7 @@ def preview_response(case: dict) -> dict:
         'status': ('Status', 'Draft ready'), 'customer': ('Customer', data['customer_name']),
         'case': ('Case ID', data['case_id']), 'message': ('Message', data['message']),
         'draft': ('Draft reference', data['draft_id']),
-        'receipt': ('Credit receipt', data['receipt_id']),
+        'receipt': ('Compensation receipt', data['receipt_id']),
         'next': ('Next step', 'Tell KAI who should receive this update.'),
     })
 
@@ -145,7 +148,7 @@ def dispatch_response(case: dict, draft_id: str, recipient: str) -> dict:
         'status': ('Status', 'Sent'), 'recipient': ('Recipient', display),
         'channel': ('Channel', 'WhatsApp'), 'case': ('Case ID', data['case_id']),
         'reference': ('Message reference', data['message_id']),
-        'message': ('Message', data['message']), 'receipt': ('Credit receipt', data['receipt_id']),
+        'message': ('Message', data['message']), 'receipt': ('Compensation receipt', data['receipt_id']),
     })
 
 

@@ -26,10 +26,10 @@ class OutageAPITests(unittest.TestCase):
                 # Existing native callback needs only the stored quote ID.
                 posted = client.post('/outage/workflow/decide',headers=writer,json={'quote_id':quote['quote_id'],'approved':True})
                 self.assertEqual(posted.status_code,200,posted.text)
-                self.assertEqual(client.get('/outage/cases/CASE-NOUR-001',headers=a).json()['invoice_due_egp'],810)
+                self.assertEqual(client.get('/outage/cases/CASE-NOUR-001',headers=a).json()['invoice_due_egp'],900)
                 fresh = client.get('/outage/cases/CASE-NOUR-001',headers=b).json()
                 self.assertEqual(fresh['invoice_due_egp'],900)
-                self.assertIsNone(fresh['credit_receipt'])
+                self.assertIsNone(fresh['compensation_receipt'])
                 self.assertEqual(fresh['case_id'],'CASE-NOUR-001')
 
     def test_malformed_conversation_header_is_rejected(self):
@@ -43,19 +43,19 @@ class OutageAPITests(unittest.TestCase):
             'OUTAGE_WORKFLOW_TOKEN': 'privileged-test-workflow-only',
         }), patch('app.config.AGENT_AUTH_TOKEN', 'reader-test-token'):
             with TestClient(app) as client:
-                self.assertEqual(client.get('/health').json()['outage_demo_version'], '2026-11-19-en-v3')
+                self.assertEqual(client.get('/health').json()['outage_demo_version'], '2026-11-19-data-v4')
                 reader = {'Authorization': 'Bearer reader-test-token'}
                 writer = {'Authorization': 'Bearer privileged-test-workflow-only'}
                 self.assertEqual(client.get('/outage/cases/CASE-NOUR-001').status_code, 401)
                 self.assertEqual(client.get('/outage/cases/CASE-NOUR-001', headers=reader).status_code, 200)
                 quote = client.post('/outage/quotes', headers=reader, json={'case_id':'CASE-NOUR-001'}).json()
-                self.assertEqual(quote['credit_egp'], 90)
+                self.assertEqual(quote['bonus_data_gb'], 20)
                 body = {'quote_id':quote['quote_id'], 'approved':True}
                 self.assertEqual(client.post('/outage/workflow/decide', headers=reader, json=body).status_code, 403)
                 response = client.post('/outage/workflow/decide', headers=writer, json=body)
                 self.assertEqual(response.status_code, 200, response.text)
-                self.assertEqual(response.json()['invoice_after_egp'], 810)
-                self.assertEqual(client.post('/outage/workflow/decide', headers=writer, json={**body,'credit_egp':900}).status_code, 422)
+                self.assertEqual(response.json()['invoice_after_egp'], 900)
+                self.assertEqual(client.post('/outage/workflow/decide', headers=writer, json={**body,'bonus_data_gb':900}).status_code, 422)
 
     def test_privileged_endpoint_disabled_without_separate_secret(self):
         with patch.dict(os.environ, {'OUTAGE_WORKFLOW_TOKEN':''}):

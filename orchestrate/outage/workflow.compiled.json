@@ -1,11 +1,11 @@
 {
   "spec": {
     "kind": "flow",
-    "name": "kai_outage_credit_workflow_20261119",
-    "display_name": "Outage Credit Approval",
-    "description": "Assess synthetic outage credit, pause for a real human decision, revalidate and post once. Workflow form approval is required even if chat says approved.",
+    "name": "kai_outage_data_workflow_20261119",
+    "display_name": "Outage Data Compensation Approval",
+    "description": "Review a 20 GB bonus-data proposal, collect a native human decision, provision once and return a receipt and explicit outcome. The invoice is unchanged.",
     "input_schema": {
-      "$ref": "#/schemas/kai_outage_credit_workflow_20261119_input"
+      "$ref": "#/schemas/kai_outage_data_workflow_20261119_input"
     },
     "output_schema": {
       "$ref": "#/schemas/Result"
@@ -18,7 +18,7 @@
       "spec": {
         "kind": "tool",
         "name": "prepare",
-        "display_name": "Verify Evidence and Calculate Credit",
+        "display_name": "Verify Evidence and Prepare Bonus Data",
         "input_schema": {
           "$ref": "#/schemas/prepare_input"
         },
@@ -33,100 +33,6 @@
             {
               "target_variable": "self.input.case_id",
               "value_expression": "flow.input.case_id",
-              "has_no_value": false,
-              "default_value": null,
-              "metadata": {
-                "assignmentType": "pyExpression"
-              }
-            }
-          ]
-        }
-      }
-    },
-    "policy_review": {
-      "spec": {
-        "kind": "agent",
-        "name": "policy_review",
-        "display_name": "Review Compensation Policy",
-        "input_schema": {
-          "$ref": "#/schemas/policy_review_input"
-        },
-        "output_schema": {
-          "$ref": "#/schemas/PolicyReview"
-        },
-        "message": "Search your knowledge source and review this quote against the outage policy. Explain the relevant sections and whether supervisor approval is needed. Return policy_review with the policy ID and sections. Do not post a credit.",
-        "agent": "kai_outage_policy_agent_20261118",
-        "thread_control_policy": "REUSE_AND_CORRELATE"
-      },
-      "input_map": {
-        "spec": {
-          "maps": [
-            {
-              "target_variable": "self.input.case_id",
-              "value_expression": "flow.prepare.output.case_id",
-              "has_no_value": false,
-              "default_value": null,
-              "metadata": {
-                "assignmentType": "pyExpression"
-              }
-            },
-            {
-              "target_variable": "self.input.quote_id",
-              "value_expression": "flow.prepare.output.quote_id",
-              "has_no_value": false,
-              "default_value": null,
-              "metadata": {
-                "assignmentType": "pyExpression"
-              }
-            },
-            {
-              "target_variable": "self.input.credit_egp",
-              "value_expression": "flow.prepare.output.credit_egp",
-              "has_no_value": false,
-              "default_value": null,
-              "metadata": {
-                "assignmentType": "pyExpression"
-              }
-            },
-            {
-              "target_variable": "self.input.invoice_before_egp",
-              "value_expression": "flow.prepare.output.invoice_before_egp",
-              "has_no_value": false,
-              "default_value": null,
-              "metadata": {
-                "assignmentType": "pyExpression"
-              }
-            },
-            {
-              "target_variable": "self.input.invoice_after_egp",
-              "value_expression": "flow.prepare.output.invoice_after_egp",
-              "has_no_value": false,
-              "default_value": null,
-              "metadata": {
-                "assignmentType": "pyExpression"
-              }
-            },
-            {
-              "target_variable": "self.input.confirmed_hours",
-              "value_expression": "flow.prepare.output.confirmed_hours",
-              "has_no_value": false,
-              "default_value": null,
-              "metadata": {
-                "assignmentType": "pyExpression"
-              }
-            },
-            {
-              "target_variable": "self.input.requires_approval",
-              "value_expression": "flow.prepare.output.requires_approval",
-              "has_no_value": false,
-              "default_value": null,
-              "metadata": {
-                "assignmentType": "pyExpression"
-              }
-            },
-            {
-              "target_variable": "self.input.policy_version",
-              "value_expression": "flow.prepare.output.policy_version",
               "has_no_value": false,
               "default_value": null,
               "metadata": {
@@ -184,8 +90,8 @@
           "spec": {
             "kind": "user",
             "name": "decision",
-            "display_name": "Review Service Credit",
-            "description": "Review the proposed service credit and record your decision. Synthetic demonstration data.",
+            "display_name": "Review Bonus Data Compensation",
+            "description": "Review the 20 GB bonus data proposal. The invoice remains 900 EGP. Record your decision to continue.",
             "owners": [
               "__current_user__"
             ],
@@ -193,7 +99,7 @@
             "form": {
               "name": "decision",
               "kind": "form",
-              "display_name": "Review Service Credit",
+              "display_name": "Review Bonus Data Compensation",
               "fields": [
                 {
                   "name": "review_case_id",
@@ -349,16 +255,16 @@
                   }
                 },
                 {
-                  "name": "review_credit_egp",
+                  "name": "review_bonus_data_gb",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Proposed Credit (EGP)",
+                  "display_name": "Proposed Bonus Data (GB)",
                   "input_map": {
                     "spec": {
                       "maps": [
                         {
                           "target_variable": "self.input.value",
-                          "value_expression": "flow.prepare.output.credit_egp",
+                          "value_expression": "flow.prepare.output.bonus_data_gb",
                           "has_no_value": false,
                           "default_value": null,
                           "metadata": {}
@@ -396,7 +302,58 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Proposed Credit (EGP)"
+                    "ui:title": "Proposed Bonus Data (GB)"
+                  }
+                },
+                {
+                  "name": "review_bonus_balance_after_gb",
+                  "kind": "field",
+                  "direction": "output",
+                  "display_name": "Compensation Data Balance After Approval (GB)",
+                  "input_map": {
+                    "spec": {
+                      "maps": [
+                        {
+                          "target_variable": "self.input.value",
+                          "value_expression": "flow.prepare.output.bonus_balance_after_gb",
+                          "has_no_value": false,
+                          "default_value": null,
+                          "metadata": {}
+                        }
+                      ]
+                    }
+                  },
+                  "input_schema": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "value"
+                    ],
+                    "in_field": null
+                  },
+                  "uiSchema": {
+                    "ui:widget": "DataWidget",
+                    "ui:options": {
+                      "label": true
+                    },
+                    "ui:title": "Compensation Data Balance After Approval (GB)"
                   }
                 },
                 {
@@ -454,7 +411,7 @@
                   "name": "review_invoice_after_egp",
                   "kind": "field",
                   "direction": "output",
-                  "display_name": "Invoice After Approval (EGP)",
+                  "display_name": "Unchanged Invoice (EGP)",
                   "input_map": {
                     "spec": {
                       "maps": [
@@ -498,7 +455,7 @@
                     "ui:options": {
                       "label": true
                     },
-                    "ui:title": "Invoice After Approval (EGP)"
+                    "ui:title": "Unchanged Invoice (EGP)"
                   }
                 },
                 {
@@ -615,9 +572,13 @@
                     "type": "string",
                     "title": "Confirmed Outage Hours"
                   },
-                  "review_credit_egp": {
+                  "review_bonus_data_gb": {
                     "type": "string",
-                    "title": "Proposed Credit (EGP)"
+                    "title": "Proposed Bonus Data (GB)"
+                  },
+                  "review_bonus_balance_after_gb": {
+                    "type": "string",
+                    "title": "Compensation Data Balance After Approval (GB)"
                   },
                   "review_invoice_before_egp": {
                     "type": "string",
@@ -625,7 +586,7 @@
                   },
                   "review_invoice_after_egp": {
                     "type": "string",
-                    "title": "Invoice After Approval (EGP)"
+                    "title": "Unchanged Invoice (EGP)"
                   },
                   "review_policy_version": {
                     "type": "string",
@@ -699,7 +660,7 @@
       "spec": {
         "kind": "tool",
         "name": "record_decision",
-        "display_name": "Revalidate and Record Decision",
+        "display_name": "Record Decision and Provision Bonus Data",
         "input_schema": {
           "$ref": "#/schemas/record_decision_input"
         },
@@ -755,10 +716,6 @@
     },
     {
       "start": "prepare",
-      "end": "policy_review"
-    },
-    {
-      "start": "policy_review",
       "end": "approval"
     },
     {
@@ -771,9 +728,9 @@
     }
   ],
   "schemas": {
-    "kai_outage_credit_workflow_20261119_input": {
+    "kai_outage_data_workflow_20261119_input": {
       "type": "object",
-      "title": "kai_outage_credit_workflow_20261119_input",
+      "title": "kai_outage_data_workflow_20261119_input",
       "required": [
         "case_id"
       ],
@@ -790,7 +747,8 @@
       "required": [
         "status",
         "case_id",
-        "quote_id"
+        "quote_id",
+        "summary"
       ],
       "properties": {
         "status": {
@@ -810,15 +768,24 @@
           "title": "Receipt Id",
           "default": ""
         },
-        "credit_egp": {
+        "bonus_data_gb": {
           "type": "number",
-          "title": "Credit Egp",
+          "title": "Bonus Data Gb",
+          "default": 0
+        },
+        "bonus_balance_after_gb": {
+          "type": "number",
+          "title": "Bonus Balance After Gb",
           "default": 0
         },
         "invoice_after_egp": {
           "type": "number",
           "title": "Invoice After Egp",
           "default": 0
+        },
+        "summary": {
+          "type": "string",
+          "title": "Summary"
         }
       }
     },
@@ -841,7 +808,9 @@
       "required": [
         "case_id",
         "quote_id",
-        "credit_egp",
+        "bonus_data_gb",
+        "bonus_balance_before_gb",
+        "bonus_balance_after_gb",
         "invoice_before_egp",
         "invoice_after_egp",
         "confirmed_hours",
@@ -857,9 +826,17 @@
           "type": "string",
           "title": "Quote Id"
         },
-        "credit_egp": {
+        "bonus_data_gb": {
           "type": "number",
-          "title": "Credit Egp"
+          "title": "Bonus Data Gb"
+        },
+        "bonus_balance_before_gb": {
+          "type": "number",
+          "title": "Bonus Balance Before Gb"
+        },
+        "bonus_balance_after_gb": {
+          "type": "number",
+          "title": "Bonus Balance After Gb"
         },
         "invoice_before_egp": {
           "type": "number",
@@ -880,67 +857,6 @@
         "policy_version": {
           "type": "string",
           "title": "Policy Version"
-        }
-      }
-    },
-    "policy_review_input": {
-      "type": "object",
-      "title": "policy_review_input",
-      "required": [
-        "case_id",
-        "quote_id",
-        "credit_egp",
-        "invoice_before_egp",
-        "invoice_after_egp",
-        "confirmed_hours",
-        "requires_approval",
-        "policy_version"
-      ],
-      "properties": {
-        "case_id": {
-          "type": "string",
-          "title": "Case Id"
-        },
-        "quote_id": {
-          "type": "string",
-          "title": "Quote Id"
-        },
-        "credit_egp": {
-          "type": "number",
-          "title": "Credit Egp"
-        },
-        "invoice_before_egp": {
-          "type": "number",
-          "title": "Invoice Before Egp"
-        },
-        "invoice_after_egp": {
-          "type": "number",
-          "title": "Invoice After Egp"
-        },
-        "confirmed_hours": {
-          "type": "number",
-          "title": "Confirmed Hours"
-        },
-        "requires_approval": {
-          "type": "boolean",
-          "title": "Requires Approval"
-        },
-        "policy_version": {
-          "type": "string",
-          "title": "Policy Version"
-        }
-      }
-    },
-    "PolicyReview": {
-      "type": "object",
-      "title": "PolicyReview",
-      "required": [
-        "policy_review"
-      ],
-      "properties": {
-        "policy_review": {
-          "type": "string",
-          "title": "Policy Review"
         }
       }
     },
@@ -950,7 +866,9 @@
       "required": [
         "case_id",
         "quote_id",
-        "credit_egp",
+        "bonus_data_gb",
+        "bonus_balance_before_gb",
+        "bonus_balance_after_gb",
         "invoice_before_egp",
         "invoice_after_egp",
         "confirmed_hours",
@@ -966,9 +884,17 @@
           "type": "string",
           "title": "Quote Id"
         },
-        "credit_egp": {
+        "bonus_data_gb": {
           "type": "number",
-          "title": "Credit Egp"
+          "title": "Bonus Data Gb"
+        },
+        "bonus_balance_before_gb": {
+          "type": "number",
+          "title": "Bonus Balance Before Gb"
+        },
+        "bonus_balance_after_gb": {
+          "type": "number",
+          "title": "Bonus Balance After Gb"
         },
         "invoice_before_egp": {
           "type": "number",
@@ -995,7 +921,7 @@
     "decision": {
       "type": "object",
       "title": "decision",
-      "description": "Review the proposed service credit and record your decision. Synthetic demonstration data.",
+      "description": "Review the 20 GB bonus data proposal. The invoice remains 900 EGP. Record your decision to continue.",
       "properties": {}
     },
     "record_decision_input": {
@@ -1060,8 +986,17 @@
           }
         },
         {
-          "target_variable": "flow.output.credit_egp",
-          "value_expression": "flow.record_decision.output.credit_egp",
+          "target_variable": "flow.output.bonus_data_gb",
+          "value_expression": "flow.record_decision.output.bonus_data_gb",
+          "has_no_value": false,
+          "default_value": null,
+          "metadata": {
+            "assignmentType": "pyExpression"
+          }
+        },
+        {
+          "target_variable": "flow.output.bonus_balance_after_gb",
+          "value_expression": "flow.record_decision.output.bonus_balance_after_gb",
           "has_no_value": false,
           "default_value": null,
           "metadata": {
@@ -1071,6 +1006,15 @@
         {
           "target_variable": "flow.output.invoice_after_egp",
           "value_expression": "flow.record_decision.output.invoice_after_egp",
+          "has_no_value": false,
+          "default_value": null,
+          "metadata": {
+            "assignmentType": "pyExpression"
+          }
+        },
+        {
+          "target_variable": "flow.output.summary",
+          "value_expression": "flow.record_decision.output.summary",
           "has_no_value": false,
           "default_value": null,
           "metadata": {
