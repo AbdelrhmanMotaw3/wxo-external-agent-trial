@@ -7,7 +7,7 @@ from pathlib import Path
 from ibm_watsonx_orchestrate.client.utils import instantiate_client, get_current_env_url
 from ibm_watsonx_orchestrate.client.tools.flow_mcp_client import FlowMCPClient
 
-FLOW = 'kai_outage_credit_workflow_20261118'
+FLOW = 'kai_outage_credit_workflow_20261119'
 sys.stdout.reconfigure(encoding='utf-8')
 
 

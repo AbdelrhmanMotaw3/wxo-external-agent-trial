@@ -4,10 +4,11 @@ All customer data, incidents, policy and money are synthetic. Native agents, ret
 
 ## Active configuration
 
-The English-only cut replaces the earlier bilingual presentation. Keep technical asset IDs and capabilities unchanged. Current import/deployment verification is recorded below as work completes.
+The English-only cut replaces the earlier bilingual presentation. Preserve the existing agent IDs, connection IDs and capabilities. The active workflow was re-registered under a new technical identity after the UI investigation; use the verified identity below.
 
 - Tenant: ISYS-Event-Nov2026, Sydney, instance cf489b1a-fca3-4013-947f-5ae008b3a3fd.
 - Employee entry: KAI | Service Recovery Copilot.
+- Active Draft workflow: kai_outage_credit_workflow_20261119, ID fa7ab96e-be92-48f8-90e6-d4b91141dc0d, display name Outage Credit Approval. The previous 20261118 workflow remains available for rollback and is no longer bound to the Draft copilot.
 - Collaborators: KAI | External Network Partner, KAI | Policy & Billing, KAI | Customer Communications.
 - English knowledge source: policy-en.txt, policy OUTAGE-CREDIT-2026.11-v1.
 - Case CASE-NOUR-001; customer Nour Ahmed; service SVC-NOUR-001; original order ORDER-KAI-2048.
@@ -30,7 +31,8 @@ Open the Service Recovery Copilot in Build > Draft Preview. Keep the same conver
 | 4 | Process the compensation. | Start the native workflow, retrieve policy, and show the English human-decision form. |
 | 5 | Form interaction | Select Approve and click Record Decision. This actual form submission records approval. |
 | 6 | What's the outcome? | Follow the real workflow result and read the updated case: applied credit 90, due 810, actual generated receipt. |
-| 7 | Prepare a WhatsApp update for Nour. | Delegate to Customer Communications with the actual receipt; return an English DRAFT. |
+| 7 | Prepare a WhatsApp update for Nour. | Review the actual receipt with Customer Communications, then prepare the canonical English draft and native preview card. |
+| 8 | Send it to Nour on WhatsApp. | Run the scenario transport for Nour's synthetic saved contact and return a native WhatsApp sent card. No provider API is called. |
 
 The employee is not required to repeat a case ID, name a tool, specify a reply language, or append implementation restrictions to each request. An execution request starts the protected approval flow; a review request produces an assessment.
 
@@ -110,3 +112,70 @@ Post-deployment Draft thread e21b549e-4441-44a9-a681-d94e94720d35 exercised the 
 Start a fresh Draft Preview chat for filming; the old rehearsal chat retains its completed receipt. Use the natural conversation table above. The application and native API/MCP checks are verified; this deployment did not include a fresh visual UI recording or Live release.
 
 Pending optional work: Twilio transport and delivery, Agent Identity enablement, Live publishing and a separate-actor authorization test. An Egyptian-Arabic presentation adapter at the router may be added separately later; the present demo content and specialists are English-only.
+
+### Subsequent native UI investigation, 19 November
+
+Intermittent Draft form stalls were reported after the card displayed Submitted. A stored user form submission can exist while the native human task still reports input_required. Recovery of the original recorded rejection completed the human task, but its downstream task then failed with Failed to refresh token. This is distinct from proving a form-mapping defect.
+
+The unchanged full workflow subsequently completed two real Draft UI rejection tests: 84cd7196-c410-491f-af0f-0f0f206a65ae and e5ad9412-a4b3-47d7-a170-71123bba210a. Both returned rejected, credit 0 and invoice 900. A full Draft UI approval also completed as instance 3f022bd6-4c22-4b41-b752-592a88afc227, quote Q-b2114ba2db9249b3, receipt CR-ad061e44011b4d23, applied credit 90 and invoice 810. All prepare, policy, human-decision and recording steps completed without an error.
+
+That historical UI approval left the case at 810. A later user-operated fresh-ledger reset restored 900 before the final test below. Repeating a credit request after an applied credit should be rejected by the backend's duplicate-credit guard.
+
+Only the separate non-financial KAI | Form Diagnostic agent was explicitly authorized and published to Live. Its agent ID is 90648bed-84e2-4819-a7fc-59e6ad873c46 and form-only flow ID is a3f402e4-c258-4248-99df-edbc6e302844. The user reported successful diagnostic tests in both Live and Draft. The original demo copilot has not been published to Live as part of this investigation.
+
+The user subsequently completed the diagnostic form with the cloned PII control, a policy-agent handoff, a post-form Python tool, their combined sequence, and the combined sequence with both cloned PII and Regex controls. These tests did not reproduce the failure. Original demo control bindings remain unchanged. Individual controls and the policy/form/Python sequence were not demonstrated to cause the stalls.
+
+### Verified clean-registration workaround, 19 November
+
+The complete workflow was re-registered as kai_outage_credit_workflow_20261119 (fa7ab96e-be92-48f8-90e6-d4b91141dc0d) and the existing Draft copilot was rebound to it. Source and compiled definitions are identical to the previous version after normalizing the technical name, including schemas, graph, user assignment and the Decision output mapping. Human approval, the downstream-only settlement tool, separate reader/writer connections and the original controls are preserved. No backend code or image change was required for this workaround. The old registration is retained for rollback.
+
+After the user reset the synthetic ledger, case-read run 114d0abb-6eb7-4543-b36d-7be6c3703a0e verified invoice 900 and no receipt. The user then tested the original employee scenario in the browser that had exhibited stalls and reported that both Reject and Approve returned normally. Independent native execution inspection confirmed both runs used the new workflow model:
+
+| Decision | Workflow instance | Result | Invoice due | Receipt |
+|---|---|---|---|---|
+| Reject | 652dd276-4253-4bf2-bf09-cd19f3c5080b | rejected; credit 0 | 900 EGP | none |
+| Approve | 83ce3829-32b2-438a-8070-7c742eb36fc6 | applied; credit 90 | 810 EGP | CR-df4d0899ca1b4474 |
+
+Both human tasks and all downstream tasks completed without an error. Approval quote: Q-4ffd42d8437a4c26. Trace IDs: rejection 589832cd2e01dc9e7dbc846eaee805f0; approval c0c4dd24f84748e83056d60a71f1b716. These are observed UI and native-runtime results for a clean registration; they do not establish a permanent root-cause fix in the platform.
+
+The latest verified case is now at 810 with that receipt. Continue with "What's the outcome?" and "Prepare a WhatsApp update for Nour." for the remaining scenes. Start a fresh 900-EGP take only after a controlled ledger reset and a new case read. The two new test workflows are terminal; older stalled tasks reference quotes absent from the fresh ledger and must not be replayed as new approvals. The full demo remains Draft; only the diagnostic agent was published to Live.
+
+Final independent case-read run e404bd78-a153-49ce-94ec-2c4e32b6dc0a executed kai_outage_get_case and reported invoice 810, applied credit 90 and the same receipt. Local verification passed 10 business/English tests and 3 API authorization tests, plus source/compiled equivalence, agent tool-boundary checks and git diff --check. The API tests required execution outside the sandbox because their local TestClient initialization stalled inside it; tracing was disabled for these local tests only.
+
+### WhatsApp scenario transport, 19 November
+
+Draft copilot tools kai_outage_whatsapp_preview (71163c7f-e205-44aa-88b3-af3a61d9ee55) and kai_outage_whatsapp_send (6a70daaf-5e10-4e25-a0cd-a1dec593f8a2) use only the existing reader connection. They are placed on the entry agent so native card metadata does not depend on a collaborator hop. Customer Communications remains the receipt-review specialist. The existing approval workflow, privileged billing-tool boundary and original control bindings are preserved. No Code Engine rebuild, credential change or Live publication was performed.
+
+Preview and dispatch independently read the posted receipt. A changed receipt invalidates the old draft. The canonical draft is unchanged by dispatch. The simulated send emits an internal KAI-WA reference and a Sent card; structured metadata explicitly records simulated=true, provider_dispatch_performed=false, provider_message_id=null and delivery_status=not_attempted. There is no provider outbox or delivery persistence. A stable reference on repeated calls is not evidence of an actual provider transaction.
+
+Eight local contract tests pass, covering missing receipt, stale draft / invoice, invalid or redacted recipient, stable message reference, unchanged body, fresh case read and native-card metadata. Initial API preview run 09e0c118-2eab-4e48-8a54-757a729bade5 returned WhatsApp message ready. Follow-up d1397271-43b4-4518-a3a0-0e3dc24278df returned WhatsApp sent through the new dispatch tool in thread 8b169eb0-0ba0-49e6-ae65-8e934311110e. These runs verify tool execution; visual card rendering remains pending the user's browser test because the embedded-browser session required sign-in. Use the rehearsal instructions below and report whether a card or text alone appears.
+
+For the notification-only rehearsal, open a fresh Draft Preview and send: Open case CASE-NOUR-001. Then: Prepare a WhatsApp update for Nour. Then: Send it to Nour on WhatsApp. The current posted receipt supports this test without resetting the invoice. For the full compensation journey, first restore the 900/no-receipt baseline through the user-operated ledger reset, then complete a new human approval and prepare a fresh WhatsApp draft. Redacted numeric recipients are never guessed; the saved-contact wording avoids ambiguous destination selection under the existing PII control.
+
+### Settled-case handling and masked recipient, 19 November
+
+A reported 409 was a duplicate-credit guard on the existing applied receipt CR-df4d0899ca1b4474, not a failed fresh approval. An independent case read confirmed invoice 810 and the same receipt. Draft copilot instructions now check existing settlement before preparing a quote or starting another workflow. Fresh-chat run ceb50fad-8d0d-4aac-b8c1-cffd0687cf8c called only kai_outage_get_case, returned the actual applied 90 / remaining 810, and started no new workflow. A new chat does not reset the ledger. A fresh approved take requires a separately verified 900/no-receipt baseline.
+
+WhatsApp recipient display now preserves only the international prefix and first national digit, masking every remaining digit. Nour's synthetic saved contact displays +201*********. The full number and last-four-digit suffix are absent from the outgoing card/result. Fresh preview run 40979135-cd5e-441d-b7c1-3fb1cee8676a and send run 7ce4d6a8-0b7a-4bb5-ada9-9cef6775bc03 verified recipient +201********* in the actual structured tool payload. The scenario still performs no provider dispatch. Nine notification tests plus ten business/English tests passed.
+
+Timestamp privacy investigation: controlled echo run 47948435-259b-4a1b-9fed-c8401eaca1f5 reproduced redaction of the four known synthetic timestamps. Adding exact date/timestamp exceptions to the diagnostic-only PII clone preserved all four timestamps in run 24978412-603e-4225-9c33-9001afedb665 while email, telephone and the synthetic identifier remained redacted. Diagnostic instructions and clone configuration were restored after the comparison.
+
+The user subsequently explicitly approved applying those exact exceptions to the existing shared business control across the three bound agents in Draft and Live. The config-only patch was applied to binding 02d5ee31-368f-4732-b2bf-4fafec14242d, now version 5, and independently read back. It adds only the four anchored event date/timestamp patterns in pii.yaml. Existing email/phone detection, custom identifier pattern, redaction strategy/text, logging settings, hooks, priority, activation state and agent/tool/model mappings were all unchanged. No agent release was published and no billing data was reset. The earlier automatic-review block is resolved by that explicit approval. Verification metadata is saved locally under runtime/approved-incident-date-control-verified.json.
+
+Post-change copilot run 7a743ec1-6f3b-45bb-80f3-de0ee3f60fd7 returned the correct start and restoration dates, UTC times and 72-hour duration without redaction in the API answer. It reused the active conversation context and made no new external call; this is not a new visual browser check. Refresh Draft Preview before the next user-side UI verification.
+
+### Conversation-isolated rehearsals: prepared, rollout pending
+
+This section supersedes the shared-ledger/reset instructions above **after** the v3 backend and the context-aware Draft tools are activated together. A new conversation then starts CASE-NOUR-001 at 900 EGP with no receipt; subsequent turns retain that conversation's approval, rejection and invoice. Opening a new chat no longer requires a ledger reset. Returning to an existing chat retains its settlement while its ledger is available.
+
+The scope is the platform-injected `wxo_thread_id`, not a model-generated argument or the per-message run ID. Native diagnostic runs e49f256a-aeb9-41f1-8f9c-72ad4653817a and 4c74d65b-9742-47bb-a7f8-ec299d97036d returned the same chat ID; a new chat returned a different ID. Native flow 65296f54-2ef2-477e-8a27-936d79b411e8 completed and its tool received the original chat ID. Temporary diagnostic Draft instructions, tools and context whitelist were restored and independently read back afterward.
+
+Reader and quote tools pass `X-KAI-Rehearsal-ID` through the existing reader connection. They reject missing context or a backend that fails to acknowledge the scope. Stored quotes bind the private ledger namespace; the existing workflow writer resolves the matching case from its stored quote. The native form, policy review, separate writer credential, duplicate-credit protection and workflow-only writer attachment are preserved. This is synthetic recording isolation, not an end-user authorization mechanism.
+
+The user's screenshot demonstrated that the earlier widget rendered only its title. The new WhatsApp tools return an official ToolResult with complete primary Markdown: status, case, receipt, message body and, for Send, the masked recipient and internal message reference. Explicit `Send to WhatsApp` can compose the current canonical message inline. A supplied draft must still match the current receipt. Repeated sends for that receipt/contact use a stable internal reference; another receipt gets a different reference. No provider transport or delivery is attempted.
+
+Fresh local verification: 23 backend/API/English tests, 17 tool/notification tests and 8 release-helper tests passed. An initial helper-test invocation used Python without the Code Engine SDK; rerunning with the existing application virtual environment passed all eight helper checks. Native human approval with the new scoped backend and actual UI rendering remain **unverified pending rollout**.
+
+Release order: run `scripts/cloudshell_rehearsal_release.py --source <full-reviewed-commit>` in authenticated IBM Cloud Shell; verify public health version `2026-11-19-en-v3` and `rehearsal_sessions=true`; then enable the Copilot's `wxo_thread_id` context and import the new reader/WhatsApp tools into Draft. The helper updates only the existing telecom-network image using an exact source/digest and ETag guard. It neither reads nor modifies secret contents, connection values, runtime environment or scaling. The historical v2 helper must not be used for this release. The full demo remains Draft; Live publication requires its own authorization.
+
+After activation, test two actual new chats: approve in A (810), read B (900), reject in B (900), then approve in B (810 with a distinct receipt). Confirm a repeated credit in A stays 810, and inspect both prepare/send output in the native UI. Code Engine local disk remains ephemeral; changing/replacing its instance can discard all conversation ledgers. Avoid deployments during a pending approval or a recording take.

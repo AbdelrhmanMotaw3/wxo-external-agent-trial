@@ -18,6 +18,11 @@ control:
     allowlist_patterns:
       - 'OUTAGE-CREDIT-2026\.11-v1|ORDER-KAI-2048'
       - '^(?:2026|2048)$'
+      # Exact non-personal event timestamps; no general date or phone exemption.
+      - '^2026-11-14(?:T08:00:00Z)?$'
+      - '^2026-11-17(?:T08:00:00Z)?$'
+      - '^2026-11-18(?:T12:00:00Z)?$'
+      - '^2026-10-15(?:T10:00:00Z)?$'
     default_mask_strategy: redact
     redaction_text: '[REDACTED]'
     block_on_detection: false

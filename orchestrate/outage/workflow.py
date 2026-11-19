@@ -40,7 +40,7 @@ class Result(BaseModel):
     invoice_after_egp: float = 0
 
 
-@flow(name='kai_outage_credit_workflow_20261118',
+@flow(name='kai_outage_credit_workflow_20261119',
       display_name='Outage Credit Approval',
       description='Assess synthetic outage credit, pause for a real human decision, revalidate and post once. Workflow form approval is required even if chat says approved.',
       input_schema=CaseInput, output_schema=Result, suppress_agent_summarization=False)

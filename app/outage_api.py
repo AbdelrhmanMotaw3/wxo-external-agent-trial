@@ -2,6 +2,7 @@
 import hmac
 import os
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, ConfigDict, StrictBool
@@ -13,8 +14,9 @@ from app.outage import OutageStore, partner_evidence
 router = APIRouter(prefix='/outage', tags=['synthetic-outage-demo'])
 
 
-def store():
-    return OutageStore(os.environ.get('OUTAGE_LEDGER_PATH', '/tmp/telco-outage/ledger.db'))
+def store(rehearsal_id: UUID | None = None):
+    return OutageStore(os.environ.get('OUTAGE_LEDGER_PATH', '/tmp/telco-outage/ledger.db'),
+                       rehearsal_id=str(rehearsal_id) if rehearsal_id is not None else None)
 
 
 def workflow_auth(authorization: Annotated[str | None, Header()] = None):
@@ -47,8 +49,8 @@ def invoke(action):
 
 
 @router.get('/cases/{case_id}', dependencies=[Depends(require_agent_auth)])
-def get_case(case_id: str):
-    return invoke(lambda: store().case(case_id))
+def get_case(case_id: str, rehearsal_id: Annotated[UUID | None, Header(alias='X-KAI-Rehearsal-ID')] = None):
+    return invoke(lambda: store(rehearsal_id).case(case_id))
 
 
 @router.get('/evidence/{service_id}', dependencies=[Depends(require_agent_auth)])
@@ -60,10 +62,10 @@ def get_evidence(service_id: str):
 
 
 @router.post('/quotes', dependencies=[Depends(require_agent_auth)])
-def prepare_quote(body: QuoteRequest):
-    return invoke(lambda: store().quote(body.case_id))
+def prepare_quote(body: QuoteRequest, rehearsal_id: Annotated[UUID | None, Header(alias='X-KAI-Rehearsal-ID')] = None):
+    return invoke(lambda: store(rehearsal_id).quote(body.case_id))
 
 
 @router.post('/workflow/decide', dependencies=[Depends(workflow_auth)])
-def record_workflow_decision(body: DecisionRequest):
-    return invoke(lambda: store().decide(body.quote_id, body.approved))
+def record_workflow_decision(body: DecisionRequest, rehearsal_id: Annotated[UUID | None, Header(alias='X-KAI-Rehearsal-ID')] = None):
+    return invoke(lambda: store(rehearsal_id).decide(body.quote_id, body.approved))

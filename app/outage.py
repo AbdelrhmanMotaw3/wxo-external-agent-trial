@@ -48,7 +48,13 @@ class OutageStore:
     Code Engine's default local disk is ephemeral: use a persistent backend for
     continuity across revisions/scale-to-zero. Demo-only money; no payment rail.
     """
-    def __init__(self, path: str | Path):
+    def __init__(self, path: str | Path, rehearsal_id: str | None = None):
+        if rehearsal_id is not None:
+            try:
+                rehearsal_id = str(uuid.UUID(rehearsal_id))
+            except (ValueError, TypeError, AttributeError) as error:
+                raise ValueError('invalid_rehearsal_id') from error
+        self.rehearsal_id = rehearsal_id
         self.path = str(path)
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         with self._db() as db:
@@ -64,9 +70,13 @@ class OutageStore:
                     case_id TEXT PRIMARY KEY, quote_id TEXT UNIQUE NOT NULL, receipt TEXT NOT NULL);
             ''')
             db.executemany('INSERT OR IGNORE INTO cases VALUES (?,?,?,?,?,?,1)', [
-                ('CASE-NOUR-001', 'SVC-NOUR-001', 'Nour Ahmed', 'Nour Ahmed', 90000, 90000),
-                ('CASE-ROUTER-002', 'SVC-ROUTER-002', 'Ahmed Ali', 'Ahmed Ali', 90000, 90000),
+                (self._case_key('CASE-NOUR-001'), 'SVC-NOUR-001', 'Nour Ahmed', 'Nour Ahmed', 90000, 90000),
+                (self._case_key('CASE-ROUTER-002'), 'SVC-ROUTER-002', 'Ahmed Ali', 'Ahmed Ali', 90000, 90000),
             ])
+
+    def _case_key(self, case_id: str) -> str:
+        # Private storage namespace only; public customer/case labels stay stable.
+        return f'{self.rehearsal_id}:{case_id}' if self.rehearsal_id else case_id
 
     @contextmanager
     def _db(self):
@@ -83,13 +93,15 @@ class OutageStore:
             db.close()
 
     def case(self, case_id: str) -> dict:
+        key = self._case_key(case_id)
         with self._db() as db:
-            row = db.execute('SELECT * FROM cases WHERE id=?', (case_id,)).fetchone()
-            credit = db.execute('SELECT receipt FROM credits WHERE case_id=?', (case_id,)).fetchone()
+            row = db.execute('SELECT * FROM cases WHERE id=?', (key,)).fetchone()
+            credit = db.execute('SELECT receipt FROM credits WHERE case_id=?', (key,)).fetchone()
         if row is None:
             raise KeyError('case_not_found')
         return {
-            'case_id': row['id'], 'service_id': row['service_id'],
+            'case_id': case_id, 'service_id': row['service_id'],
+            'rehearsal_id': self.rehearsal_id,
             # Retain the storage layout for existing ledgers; expose one name.
             'customer_name': row['name_en'],
             'monthly_fee_egp': row['monthly_piasters']/100,
@@ -131,10 +143,12 @@ class OutageStore:
             raise ValueError('credit_already_applied')
         payload = self._assessment(case)
         payload.update(quote_id='Q-'+uuid.uuid4().hex[:16], expires_at=(time.time() if now is None else now)+1800)
+        if self.rehearsal_id:
+            payload['rehearsal_id'] = self.rehearsal_id
         payload['evidence_digest'] = hashlib.sha256(json.dumps(payload['evidence'], sort_keys=True).encode()).hexdigest()
         with self._db() as db:
             db.execute('INSERT INTO quotes(id,case_id,payload) VALUES (?,?,?)',
-                       (payload['quote_id'], case_id, json.dumps(payload, ensure_ascii=False)))
+                       (payload['quote_id'], self._case_key(case_id), json.dumps(payload, ensure_ascii=False)))
         return payload
 
     def decide(self, quote_id: str, approved: bool, now: float | None = None) -> dict:
@@ -145,20 +159,24 @@ class OutageStore:
             quote = db.execute('SELECT * FROM quotes WHERE id=?', (quote_id,)).fetchone()
             if not quote:
                 raise KeyError('quote_not_found')
+            payload = json.loads(quote['payload'])
+            if self.rehearsal_id and payload.get('rehearsal_id') != self.rehearsal_id:
+                raise ValueError('rehearsal_mismatch')
             if quote['state'] == 'applied':
                 if not approved:
                     raise ValueError('credit_already_applied')
                 return json.loads(quote['receipt'])
             if quote['state'] != 'pending':
                 raise ValueError('quote_is_closed')
-            payload = json.loads(quote['payload'])
             if (time.time() if now is None else now) >= payload['expires_at']:
                 raise ValueError('quote_expired')
             case = db.execute('SELECT * FROM cases WHERE id=?', (quote['case_id'],)).fetchone()
             if not approved:
-                result = {'status': 'rejected', 'quote_id': quote_id, 'case_id': quote['case_id'],
+                result = {'status': 'rejected', 'quote_id': quote_id, 'case_id': payload['case_id'],
                           'synthetic': True, 'receipt_id': '', 'credit_egp': 0,
                           'invoice_after_egp': case['invoice_piasters']/100}
+                if payload.get('rehearsal_id'):
+                    result['rehearsal_id'] = payload['rehearsal_id']
                 db.execute("UPDATE quotes SET state='rejected' WHERE id=?", (quote_id,))
                 return result
             evidence = partner_evidence(case['service_id'])
@@ -170,6 +188,8 @@ class OutageStore:
             result = {k: payload[k] for k in ('case_id', 'quote_id', 'credit_egp', 'invoice_before_egp', 'invoice_after_egp', 'policy_version')}
             result.update(status='applied', receipt_id='CR-'+uuid.uuid4().hex[:16], synthetic=True,
                           human_decision_recorded=True, decision_channel='native_workflow')
+            if payload.get('rehearsal_id'):
+                result['rehearsal_id'] = payload['rehearsal_id']
             encoded = json.dumps(result)
             db.execute('INSERT INTO credits VALUES (?,?,?)', (quote['case_id'], quote_id, encoded))
             db.execute("UPDATE quotes SET state='applied',receipt=? WHERE id=?", (encoded, quote_id))

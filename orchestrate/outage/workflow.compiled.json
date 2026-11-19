@@ -1,11 +1,11 @@
 {
   "spec": {
     "kind": "flow",
-    "name": "kai_outage_credit_workflow_20261118",
+    "name": "kai_outage_credit_workflow_20261119",
     "display_name": "Outage Credit Approval",
     "description": "Assess synthetic outage credit, pause for a real human decision, revalidate and post once. Workflow form approval is required even if chat says approved.",
     "input_schema": {
-      "$ref": "#/schemas/kai_outage_credit_workflow_20261118_input"
+      "$ref": "#/schemas/kai_outage_credit_workflow_20261119_input"
     },
     "output_schema": {
       "$ref": "#/schemas/Result"
@@ -771,9 +771,9 @@
     }
   ],
   "schemas": {
-    "kai_outage_credit_workflow_20261118_input": {
+    "kai_outage_credit_workflow_20261119_input": {
       "type": "object",
-      "title": "kai_outage_credit_workflow_20261118_input",
+      "title": "kai_outage_credit_workflow_20261119_input",
       "required": [
         "case_id"
       ],

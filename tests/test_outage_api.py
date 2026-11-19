@@ -10,13 +10,40 @@ from app.main import app
 
 
 class OutageAPITests(unittest.TestCase):
+    def test_conversation_header_isolates_reads_and_workflow_callback(self):
+        with tempfile.TemporaryDirectory() as temp, patch.dict(os.environ, {
+            'OUTAGE_LEDGER_PATH': str(Path(temp)/'sessions.db'),
+            'OUTAGE_WORKFLOW_TOKEN': 'privileged-test-workflow-only',
+        }), patch('app.config.AGENT_AUTH_TOKEN', 'reader-test-token'):
+            with TestClient(app) as client:
+                a = {'Authorization':'Bearer reader-test-token', 'X-KAI-Rehearsal-ID':'11111111-1111-4111-8111-111111111111'}
+                b = {'Authorization':'Bearer reader-test-token', 'X-KAI-Rehearsal-ID':'22222222-2222-4222-8222-222222222222'}
+                writer = {'Authorization':'Bearer privileged-test-workflow-only'}
+                quote = client.post('/outage/quotes', headers=a, json={'case_id':'CASE-NOUR-001'}).json()
+                # A callback with a different explicit scope must not settle A.
+                wrong = client.post('/outage/workflow/decide', headers={**writer,'X-KAI-Rehearsal-ID':b['X-KAI-Rehearsal-ID']}, json={'quote_id':quote['quote_id'],'approved':True})
+                self.assertEqual(wrong.status_code, 409)
+                # Existing native callback needs only the stored quote ID.
+                posted = client.post('/outage/workflow/decide',headers=writer,json={'quote_id':quote['quote_id'],'approved':True})
+                self.assertEqual(posted.status_code,200,posted.text)
+                self.assertEqual(client.get('/outage/cases/CASE-NOUR-001',headers=a).json()['invoice_due_egp'],810)
+                fresh = client.get('/outage/cases/CASE-NOUR-001',headers=b).json()
+                self.assertEqual(fresh['invoice_due_egp'],900)
+                self.assertIsNone(fresh['credit_receipt'])
+                self.assertEqual(fresh['case_id'],'CASE-NOUR-001')
+
+    def test_malformed_conversation_header_is_rejected(self):
+        with patch('app.config.AGENT_AUTH_TOKEN','reader-test-token'), TestClient(app) as client:
+            result=client.get('/outage/cases/CASE-NOUR-001',headers={'Authorization':'Bearer reader-test-token','X-KAI-Rehearsal-ID':'../other.db'})
+            self.assertEqual(result.status_code,422)
+
     def test_readers_cannot_apply_and_workflow_revalidates(self):
         with tempfile.TemporaryDirectory() as temp, patch.dict(os.environ, {
             'OUTAGE_LEDGER_PATH': str(Path(temp)/'test.db'),
             'OUTAGE_WORKFLOW_TOKEN': 'privileged-test-workflow-only',
         }), patch('app.config.AGENT_AUTH_TOKEN', 'reader-test-token'):
             with TestClient(app) as client:
-                self.assertEqual(client.get('/health').json()['outage_demo_version'], '2026-11-18-en-v2')
+                self.assertEqual(client.get('/health').json()['outage_demo_version'], '2026-11-19-en-v3')
                 reader = {'Authorization': 'Bearer reader-test-token'}
                 writer = {'Authorization': 'Bearer privileged-test-workflow-only'}
                 self.assertEqual(client.get('/outage/cases/CASE-NOUR-001').status_code, 401)
