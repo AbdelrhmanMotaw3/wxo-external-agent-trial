@@ -1,6 +1,6 @@
 # KAI Service Recovery - English Filming Guide
 
-**Current requested scenario:** one-time **20 GB bonus data**, with the invoice unchanged at **900 EGP**. See [the data-compensation rehearsal guide](DATA_REHEARSAL.md) for the current contract, rollout order and verification status. The financial-credit scenes below are historical evidence, not the current filming script. V4 assets are prepared; backend rollout, coordinated Draft activation and native UI continuation verification remain pending.
+**Current verified scenario:** one-time **20 GB bonus data**, with the invoice unchanged at **900 EGP**. See [the data-compensation rehearsal guide](DATA_REHEARSAL.md) for the active contract and filming steps. V4 is deployed and activated in Draft. The user confirmed successful native UI approval and conversation continuation; the corresponding workflow completed without errors. The financial-credit scenes below are historical evidence, not the current filming script.
 
 All customer data, incidents, policy and money are synthetic. Native agents, retrieval, external A2A calls, workflow tasks, controls and receipts use actual execution.
 
