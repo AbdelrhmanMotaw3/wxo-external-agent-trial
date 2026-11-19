@@ -207,3 +207,9 @@ For each recording take, refresh Draft Preview and choose **New chat** on KAI | 
 | 7 | Send it to Nour on WhatsApp. | Complete Sent result; masked contact; message reference |
 
 For the rejection scene, choose Reject at step 5; the invoice remains 900. Then send Process the compensation again. and approve the new form. Start another take with New chat rather than replaying a completed conversation. Direct Send to WhatsApp after approval is also supported without a preview step.
+
+### Case-ID capitalization correction, 19 November
+
+The user's `open case CASE-Nour-001` reached the backend unchanged and returned 404 because the stored identifier is CASE-NOUR-001. Draft case reads, quote preparation and notification reads now uppercase the supplied case ID and trim surrounding whitespace before lookup. Public records retain their canonical identifiers; unknown case IDs remain unknown. No prompt workaround, ledger reset, backend rollout, control change or Live publication was required.
+
+Three regression checks reproduced the missing normalization before the fix. Afterward, all 20 ADK tool tests and all 37 offline application tests passed using their respective existing dependency environments. The application checks emitted the pre-existing create_react_agent deprecation warning. Native Draft run 6ee3ac6c-c04f-4272-bc62-ac18319222ce, thread 895f4e8f-3547-4adc-baec-0730fc7ab4d3, then successfully executed the user's exact original message and returned canonical CASE-NOUR-001, Nour Ahmed, invoice 900 and no receipt. All four existing tool registrations were updated in place.

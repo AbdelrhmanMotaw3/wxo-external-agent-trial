@@ -1,6 +1,8 @@
 """Contract checks for the local-only notification transport inside Orchestrate."""
 import copy
 import importlib.util
+import io
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -23,6 +25,17 @@ def posted_case():
 
 
 class WhatsAppToolTests(unittest.TestCase):
+    def test_notification_lookup_accepts_the_same_mixed_case_identifier(self):
+        session='11111111-1111-4111-8111-111111111111'
+        case=posted_case()
+        case['rehearsal_id']=session
+        context=AgentRun(request_context={'wxo_thread_id':session})
+        creds={'BASE_URL':'https://telecom-network.2gqohspjx3cv.ca-tor.codeengine.appdomain.cloud','TOKEN':'test-only'}
+        with patch.object(wa.connections,'key_value',return_value=creds), patch.object(wa,'urlopen',return_value=io.BytesIO(json.dumps(case).encode())) as request:
+            result=wa._read_case('  CASE-Nour-001 ',context)
+        self.assertTrue(request.call_args.args[0].full_url.endswith('/outage/cases/CASE-NOUR-001'))
+        self.assertEqual(result['case_id'],'CASE-NOUR-001')
+
     def test_primary_native_output_contains_the_full_sent_message(self):
         case = posted_case()
         result = wa.dispatch_response(case, wa.prepare_payload(case)['draft_id'], 'NOUR_WHATSAPP')

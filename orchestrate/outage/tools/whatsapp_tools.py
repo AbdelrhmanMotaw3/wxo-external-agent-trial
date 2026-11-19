@@ -19,6 +19,7 @@ from ibm_watsonx_orchestrate.run.context import AgentRun
 
 
 def _read_case(case_id: str, context: AgentRun) -> dict:
+    case_id = case_id.strip().upper()
     if case_id != 'CASE-NOUR-001':
         raise ValueError('This notification scene supports CASE-NOUR-001 only.')
     try:

@@ -15,6 +15,22 @@ SESSION='11111111-1111-4111-8111-111111111111'
 
 
 class RehearsalToolTests(unittest.TestCase):
+    def test_case_lookup_accepts_mixed_case_and_surrounding_whitespace(self):
+        context=AgentRun(request_context={'wxo_thread_id':SESSION})
+        payload={'case_id':'CASE-NOUR-001','rehearsal_id':SESSION,'invoice_due_egp':900}
+        for value in ('CASE-Nour-001', 'case-nour-001', '  CASE-Nour-001  '):
+            with self.subTest(value=value), patch.object(reader.connections,'key_value',return_value={'BASE_URL':'https://example.test','TOKEN':'test-only'}), patch.object(reader,'urlopen',return_value=io.BytesIO(json.dumps(payload).encode())) as request:
+                result=reader.kai_outage_get_case(value,context=context)
+                self.assertEqual(request.call_args.args[0].full_url,'https://example.test/outage/cases/CASE-NOUR-001')
+                self.assertEqual(result.content['case_id'],'CASE-NOUR-001')
+
+    def test_quote_preparation_uses_the_same_canonical_case_identifier(self):
+        context=AgentRun(request_context={'wxo_thread_id':SESSION})
+        payload={'case_id':'CASE-NOUR-001','rehearsal_id':SESSION,'quote_id':'Q-TEST'}
+        with patch.object(reader.connections,'key_value',return_value={'BASE_URL':'https://example.test','TOKEN':'test-only'}), patch.object(reader,'urlopen',return_value=io.BytesIO(json.dumps(payload).encode())) as request:
+            reader.kai_outage_prepare_quote('  CASE-Nour-001 ',context=context)
+        self.assertEqual(json.loads(request.call_args.args[0].data),{'case_id':'CASE-NOUR-001'})
+
     def test_scoped_read_uses_the_platform_thread_not_a_model_argument(self):
         context=AgentRun(request_context={'wxo_thread_id':SESSION})
         payload={'case_id':'CASE-NOUR-001','rehearsal_id':SESSION,'invoice_due_egp':900}

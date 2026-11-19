@@ -39,10 +39,10 @@ def kai_outage_get_case(case_id: str, context: AgentRun) -> dict:
     """Read the case in the current conversation's independent rehearsal.
 
     Args:
-        case_id: Exact synthetic case identifier.
+        case_id: Synthetic case identifier; capitalization and surrounding whitespace are normalized.
         context: Platform-injected conversation context.
     """
-    return _request('/outage/cases/'+quote(case_id, safe=''), rehearsal_id=_rehearsal_id(context))
+    return _request('/outage/cases/'+quote(case_id.strip().upper(), safe=''), rehearsal_id=_rehearsal_id(context))
 
 
 @tool(expected_credentials=[ExpectedCredentials(app_id='kai_outage_reader_20261118', type=ConnectionType.KEY_VALUE)],
@@ -51,9 +51,9 @@ def kai_outage_prepare_quote(case_id: str, context: AgentRun) -> dict:
     """Prepare a quote bound to the current conversation's rehearsal.
 
     Args:
-        case_id: Exact synthetic case identifier.
+        case_id: Synthetic case identifier; capitalization and surrounding whitespace are normalized.
         context: Platform-injected conversation context.
     """
-    return _request('/outage/quotes', {'case_id':case_id}, rehearsal_id=_rehearsal_id(context))
+    return _request('/outage/quotes', {'case_id':case_id.strip().upper()}, rehearsal_id=_rehearsal_id(context))
 
 
