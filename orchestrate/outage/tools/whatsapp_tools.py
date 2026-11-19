@@ -126,6 +126,7 @@ def preview_response(case: dict) -> dict:
     return _card('WhatsApp message ready', data, {
         'status': ('Status', 'Draft ready'), 'customer': ('Customer', data['customer_name']),
         'case': ('Case ID', data['case_id']), 'message': ('Message', data['message']),
+        'draft': ('Draft reference', data['draft_id']),
         'receipt': ('Credit receipt', data['receipt_id']),
         'next': ('Next step', 'Tell KAI who should receive this update.'),
     })

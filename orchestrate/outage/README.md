@@ -164,7 +164,7 @@ The user subsequently explicitly approved applying those exact exceptions to the
 
 Post-change copilot run 7a743ec1-6f3b-45bb-80f3-de0ee3f60fd7 returned the correct start and restoration dates, UTC times and 72-hour duration without redaction in the API answer. It reused the active conversation context and made no new external call; this is not a new visual browser check. Refresh Draft Preview before the next user-side UI verification.
 
-### Conversation-isolated rehearsals: prepared, rollout pending
+### Conversation-isolated rehearsals: pre-rollout preparation record
 
 This section supersedes the shared-ledger/reset instructions above **after** the v3 backend and the context-aware Draft tools are activated together. A new conversation then starts CASE-NOUR-001 at 900 EGP with no receipt; subsequent turns retain that conversation's approval, rejection and invoice. Opening a new chat no longer requires a ledger reset. Returning to an existing chat retains its settlement while its ledger is available.
 
@@ -179,3 +179,31 @@ Fresh local verification: 23 backend/API/English tests, 17 tool/notification tes
 Release order: run `scripts/cloudshell_rehearsal_release.py --source <full-reviewed-commit>` in authenticated IBM Cloud Shell; verify public health version `2026-11-19-en-v3` and `rehearsal_sessions=true`; then enable the Copilot's `wxo_thread_id` context and import the new reader/WhatsApp tools into Draft. The helper updates only the existing telecom-network image using an exact source/digest and ETag guard. It neither reads nor modifies secret contents, connection values, runtime environment or scaling. The historical v2 helper must not be used for this release. The full demo remains Draft; Live publication requires its own authorization.
 
 After activation, test two actual new chats: approve in A (810), read B (900), reject in B (900), then approve in B (810 with a distinct receipt). Confirm a repeated credit in A stays 810, and inspect both prepare/send output in the native UI. Code Engine local disk remains ephemeral; changing/replacing its instance can discard all conversation ledgers. Avoid deployments during a pending approval or a recording take.
+
+### V3 activated and native runtime verified, 19 November
+
+The user completed the Cloud Shell release of c5266aaa8c4b18703b11634ad1c5ce413e74238f. Independent public health verification returned network_service, 2026-11-19-en-v3 and rehearsal_sessions=true. The reviewed reader and notification tools were then activated on the existing Draft copilot. All four tool UUIDs, collaborator attachments and approval workflow UUID were preserved. The privileged writer remains absent from the chat agent. No credentials, business controls or Live agent releases were changed.
+
+Actual conversation A, 94e51762-cf2a-45a4-8b9a-8961fe4d432a, opened at 900 with no receipt. Policy retrieval proposed 90. Native approval 0d719eab-c61a-4f80-a64a-6ae0d85aa17a completed with receipt CR-a2844a592c074d81 and invoice 810. A repeat compensation request reported the existing credit and started no further workflow.
+
+Actual conversation B, d4646ee5-6ada-4e4d-ab73-9044227eb1d8, still read 900/no receipt after A settled; the tool payload acknowledged B's own thread ID. Native rejection 3d485e44-9d4b-4492-a9ba-6695934b6249 completed at 900. A subsequent ordinary retry completed native approval ecb68f1a-387b-4a9c-8aba-e4af5a7b12eb, leaving 810 with the distinct receipt CR-c0dea9cfd9e94a6a. Every recorded preparation, policy, decision and settlement task completed without an error. These form submissions exercised the native MCP contract using the preparation account; they were not mouse-driven UI tests or a separate-actor authorization test.
+
+A third chat, 96804e5b-2de1-4b6d-b18c-21caefa92127, created after both approvals independently returned 900/no receipt. No ledger reset was performed. Its real A2A collaborator call returned the 72-hour restored outage, the expected incident reference and unredacted event timestamps. Case IDs and customer-facing details stayed unchanged.
+
+Direct `Send to WhatsApp` run b657ab24-2053-4388-88f9-ed0cf62a8514 invoked the send tool and returned complete native Markdown, not just a title. Preparation run c7354362-8821-477f-9dbe-922a83d208f2 returned the full canonical message and visible draft reference. Follow-up send run 00172783-5db7-4652-a633-3793dbd35875 returned the identical message, recipient +201********* and stable reference KAI-WA-15705a15c1e1d173. The full synthetic phone number was absent. Native tool events retained content and _meta, but omitted structuredContent; the draft reference was therefore added to primary preview content and verified with a regression check. The observed metadata explicitly records scenario transport and provider_dispatch_performed=false. There is no real provider dispatch or delivery receipt.
+
+The 17 affected tool tests passed after the visible draft-reference adjustment. Independent integrated assertions verified the three terminal workflows, distinct receipts, untouched B before its approval, fresh C baseline, identical preview/send bodies, masked recipient and real A2A evidence. Local proof is runtime/rehearsal-verified-results.json; ignored runtime files are not published. Visual rendering in the user's native UI remains the final rehearsal check.
+
+For each recording take, refresh Draft Preview and choose **New chat** on KAI | Service Recovery Copilot:
+
+| Step | Employee message or action | Expected result |
+|---|---|---|
+| 1 | Open case CASE-NOUR-001. | Nour Ahmed; invoice 900; no credit receipt |
+| 2 | What happened to the internet service? | External Network Partner; restored 72-hour outage |
+| 3 | Is Nour eligible for compensation? | Policy citations; proposed 90 credit; approval required |
+| 4 | Process the compensation. | Native Review Service Credit form |
+| 5 | Approve, then Record Decision | Applied 90; remaining 810; posted receipt |
+| 6 | Prepare a WhatsApp update for Nour. | Complete English draft and draft reference |
+| 7 | Send it to Nour on WhatsApp. | Complete Sent result; masked contact; message reference |
+
+For the rejection scene, choose Reject at step 5; the invoice remains 900. Then send Process the compensation again. and approve the new form. Start another take with New chat rather than replaying a completed conversation. Direct Send to WhatsApp after approval is also supported without a preview step.

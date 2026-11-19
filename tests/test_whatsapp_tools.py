@@ -69,6 +69,9 @@ class WhatsAppToolTests(unittest.TestCase):
         self.assertEqual(data['provider_message_id'], None)
         self.assertIn('WhatsApp message ready', result['content'][0]['text'])
         self.assertIn(data['message'], result['content'][0]['text'])
+        # Native tool events can retain content/_meta while dropping structuredContent.
+        # The subsequent send must still be able to bind the visible draft.
+        self.assertIn(data['draft_id'], result['content'][0]['text'])
 
     def test_dispatch_requires_the_exact_current_draft(self):
         case = posted_case()
